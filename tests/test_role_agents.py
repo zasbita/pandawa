@@ -9,7 +9,7 @@ FM_RE = re.compile(r'\A---\n(.*?)\n---\n', re.DOTALL)
 
 
 def test_role_files_valid():
-    roles = sorted(AGENTS_DIR.glob("*.md"))
+    roles = sorted(p for p in AGENTS_DIR.glob("*.md") if p.name != "README.md")
     assert len(roles) == 5, f"expected 5 Pandawa roles, found {[r.name for r in roles]}"
     phases = set()
     for path in roles:
