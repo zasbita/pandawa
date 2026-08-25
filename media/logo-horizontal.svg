@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 160' width='600' height='160' role='img' aria-label='Pandawa horizontal'>
+  <defs><linearGradient id='g' x1='0%' y1='100%' x2='100%' y2='0%'><stop offset='0%' stop-color='#0F172A'/><stop offset='35%' stop-color='#1E40AF'/><stop offset='68%' stop-color='#06B6D4'/><stop offset='100%' stop-color='#7C3AED'/></linearGradient></defs>
+  <g transform='translate(10,10) scale(0.7)'><polygon points='100,14 180.5,73.5 150.8,173.2 49.2,173.2 19.5,73.5' fill='none' stroke='url(#g)' stroke-width='11' stroke-linejoin='round' stroke-linecap='round'/><g fill='url(#g)'><circle cx='62' cy='60' r='5.8'/><circle cx='80' cy='49.5' r='5.8'/><circle cx='100' cy='45' r='6.8'/><circle cx='120' cy='49.5' r='5.8'/><circle cx='138' cy='60' r='5.8'/></g><path d='M 72 62 L 72 150 L 84.5 150 L 84.5 116.5 L 112 116.5 C 129.5 116.5 140 107.2 140 88.5 C 140 69.8 129.5 62 112 62 Z M 84.5 74.5 L 84.5 104 L 112 104 C 121.2 104 127.5 98.8 127.5 88.5 C 127.5 78.2 121.2 74.5 112 74.5 Z' fill='url(#g)'/></g>
+  <text x='170' y='78' font-family='Segoe UI, Bahnschrift, Inter, Arial, sans-serif' font-size='52' font-weight='800' letter-spacing='6' fill='url(#g)'>PANDAWA</text>
+  <text x='172' y='102' font-family='Segoe UI, Inter, Arial, sans-serif' font-size='13' font-weight='500' letter-spacing='1.1' fill='#64748B'>Bangun software berkualitas tinggi lebih cepat.</text>
+</svg>
