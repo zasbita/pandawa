@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' width='200' height='200' role='img' aria-label='Pandawa logo'>
+  <defs>
+    <linearGradient id='g' x1='0%' y1='100%' x2='100%' y2='0%'>
+      <stop offset='0%' stop-color='#0F172A'/>
+      <stop offset='35%' stop-color='#1E40AF'/>
+      <stop offset='68%' stop-color='#06B6D4'/>
+      <stop offset='100%' stop-color='#7C3AED'/>
+    </linearGradient>
+    <linearGradient id='g2' x1='0%' y1='100%' x2='100%' y2='0%'>
+      <stop offset='0%' stop-color='#1E40AF'/>
+      <stop offset='100%' stop-color='#7C3AED'/>
+    </linearGradient>
+  </defs>
+  <polygon points='100,14 180.5,73.5 150.8,173.2 49.2,173.2 19.5,73.5' fill='none' stroke='url(#g)' stroke-width='13' stroke-linejoin='round' stroke-linecap='round'/>
+  <g fill='url(#g2)'>
+    <circle cx='62' cy='60' r='6.5'/>
+    <circle cx='80' cy='49.5' r='6.5'/>
+    <circle cx='100' cy='45' r='7.5'/>
+    <circle cx='120' cy='49.5' r='6.5'/>
+    <circle cx='138' cy='60' r='6.5'/>
+  </g>
+  <path d='M 70 62 L 70 148 L 86 148 L 86 118 L 110 118 C 130 118 142 106 142 86 C 142 67 130 62 110 62 Z M 86 76 L 86 104 L 110 104 C 119 104 126 98 126 86 C 126 75 119 76 110 76 Z' fill='url(#g)' fill-rule='evenodd'/>
+</svg>
