@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (Pandawa layered architecture)
+
+- **Skill registry (`skills/`)**: unified registry with normalized frontmatter
+  (`phase` / `source` / `aliases`). 14 skills imported from superpowers
+  (re-runnable via `scripts/import_superpowers.py`) plus 3 quality gates ported
+  from gstack methodology-only: `code-review`, `security-audit`, `qa-audit`.
+- **Role agents (`agents/`)**: Pandawa five — yudhistira-planner, bima-builder,
+  arjuna-reviewer, nakula-qa, sadewa-security — with a host-agnostic delegation
+  protocol (self-contained briefs, native-subagent-first dispatch, structured
+  STATUS output, evidence-gated completion, context isolation).
+- **`pandawa init` now installs layers**: copies bundled skills + agents into
+  `.pandawa/`, and into the native skill dir for claude (`.claude/skills`) and
+  opencode (`.opencode/skills`). `PANDAWA_HOME` overrides the bundled-layer root.
+- **docs/architecture.md**: 4-layer model (rudis engine base, superpowers habits,
+  omo-style orchestration concepts, gstack quality gates) and per-phase ownership.
+- **VENDORED.md**: upstream provenance and re-sync rules.
+- Tests: skill-registry contract, role-agent contract, install_layers integration.
+
+### Changed
+
+- Rebrand rudis → pandawa across CLI, templates, scripts, docs; new banner/tagline.
+
+## [0.30.0] — upstream rudis snapshot
+
 ### Added
 
 - **Operations lifecycle commands** — Pandawa now extends past the build (specify → plan → tasks → implement) into an optional operations track, aligning the toolkit with the full AI-DLC lifecycle (Inception → Construction → **Operations**):
