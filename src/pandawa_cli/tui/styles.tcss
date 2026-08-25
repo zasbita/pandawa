@@ -1,0 +1,82 @@
+Screen {
+    layout: vertical;
+}
+
+TabbedContent {
+    height: 1fr;
+}
+
+StatusPane, PluginsPane, ProfilesPane, UsagePane, InitPane, RunPane {
+    height: 1fr;
+    padding: 1 2;
+}
+
+#status-summary, #plugins-status, #profiles-status, #usage-summary, #usage-commands-label,
+#init-status, #run-status {
+    height: auto;
+    padding: 0 0 1 0;
+}
+
+#status-tools, #profiles-table {
+    height: 1fr;
+}
+
+#status-profile {
+    height: auto;
+    margin-top: 1;
+}
+
+#status-update-row {
+    height: auto;
+    margin-top: 1;
+}
+
+#status-update {
+    width: 1fr;
+    height: auto;
+    content-align: left middle;
+}
+
+#status-update-btn {
+    width: auto;
+}
+
+#plugins-filter {
+    margin-bottom: 1;
+}
+
+#plugins-table {
+    height: 1fr;
+}
+
+#usage-sessions {
+    height: 2fr;
+}
+
+#usage-commands {
+    height: 1fr;
+    margin-top: 1;
+}
+
+.init-label, .run-label {
+    color: $text-muted;
+    padding-top: 1;
+}
+
+#init-warning {
+    padding-bottom: 1;
+}
+
+#init-submit, #run-submit {
+    margin-top: 1;
+}
+
+#init-progress {
+    margin-top: 1;
+}
+
+#run-result-scroll {
+    height: 1fr;
+    margin-top: 1;
+    border: round $panel;
+}

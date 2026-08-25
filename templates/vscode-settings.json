@@ -1,0 +1,14 @@
+{
+    "chat.promptFilesRecommendations": {
+        "pandawa.constitution": true,
+        "pandawa.specify": true,
+        "pandawa.plan": true,
+        "pandawa.tasks": true,
+        "pandawa.implement": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        ".pandawa/scripts/bash/": true,
+        ".pandawa/scripts/powershell/": true
+    }
+}
+

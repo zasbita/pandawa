@@ -1,0 +1,66 @@
+graph LR
+    %% Styling Definitions
+    classDef startend fill:#f9f9f9,stroke:#333,stroke-width:2px,rx:10,ry:10;
+    classDef core fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,rx:5,ry:5;
+    classDef optional fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,stroke-dasharray: 5 5,rx:5,ry:5;
+    classDef decision fill:#ffffff,stroke:#333,stroke-width:1px,rx:5,ry:5,diamond;
+
+    %% Nodes
+    Start((Mulai)):::startend
+    Init[/"pandawa init<br>(Inisialisasi)"/]:::core
+    
+    %% Core Step 1
+    Const[/"/pandawa.constitution<br>(Guidelines & Principles)"/]:::core
+    
+    %% Core Step 2
+    Spec[/"/pandawa.specify<br>(Requirements & User Stories)"/]:::core
+    
+    %% Optional: Clarify
+    DecClarify{Perlu<br>Klarifikasi?}:::decision
+    Clarify[/"/pandawa.clarify<br>(Clarify Underspecified Areas)"/]:::optional
+    
+    %% Core Step 3
+    Plan[/"/pandawa.plan<br>(Technical Plan)"/]:::core
+    
+    %% Optional: Checklist
+    DecCheck{Cek<br>Kualitas?}:::decision
+    Checklist[/"/pandawa.checklist<br>(Validate Requirements)"/]:::optional
+
+    %% Core Step 4
+    Tasks[/"/pandawa.tasks<br>(Generate Actionable List)"/]:::core
+    
+    %% Optional: Analyze
+    DecAnalyze{Analisis<br>Konsistensi?}:::decision
+    Analyze[/"/pandawa.analyze<br>(Cross-artifact Coverage)"/]:::optional
+    
+    %% Core Step 5
+    Impl[/"/pandawa.implement<br>(Execute Code)"/]:::core
+    Finish(((Selesai))):::startend
+
+    %% Connections
+    Start --> Init
+    Init --> Const
+    Const --> Spec
+    
+    Spec --> DecClarify
+    DecClarify -- Ya --> Clarify
+    Clarify --> Plan
+    DecClarify -- Tidak --> Plan
+    
+    Plan --> DecCheck
+    DecCheck -- Ya --> Checklist
+    Checklist --> Tasks
+    DecCheck -- Tidak --> Tasks
+    
+    Tasks --> DecAnalyze
+    DecAnalyze -- Ya --> Analyze
+    Analyze --> Impl
+    DecAnalyze -- Tidak --> Impl
+    
+    Impl --> Finish
+
+    %% Legend
+    subgraph Legenda
+        Core[Core Command]:::core
+        Opt[Optional Command]:::optional
+    end
