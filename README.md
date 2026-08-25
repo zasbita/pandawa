@@ -16,160 +16,160 @@
 
 ---
 
-## Daftar Isi
+## Table of Contents
 
-- [🤔 Apa itu Spec-Driven Development?](#-apa-itu-spec-driven-development)
-- [⚡ Memulai](#-memulai)
-  - [Workflow Terpandu (`/pandawa.ultimate`)](#2-jalankan-workflow-terpandu-disarankan)
-  - [Command Langkah-demi-Langkah](#3-alternatif-command-langkah-demi-langkah)
-- [🤖 Agen AI yang Didukung](#-agen-ai-yang-didukung)
-- [🔧 Referensi CLI Pandawa](#-referensi-cli-pandawa)
-  - [Profil Domain](#profil-domain)
+- [🤔 What is Spec-Driven Development?](#-what-is-spec-driven-development)
+- [⚡ Getting Started](#-getting-started)
+  - [Guided Workflow (`/pandawa.ultimate`)](#2-run-guided-workflow-recommended)
+  - [Step-by-Step Commands](#3-alternative-step-by-step-commands)
+- [🤖 Supported AI Agents](#-supported-ai-agents)
+- [🔧 Pandawa CLI Reference](#-pandawa-cli-reference)
+  - [Domain Profiles](#domain-profiles)
   - [`pandawa usage`](#pandawa-usage)
   - [`pandawa version`](#pandawa-version)
   - [`pandawa governance`](#pandawa-governance)
   - [`pandawa skill`](#pandawa-skill)
   - [`pandawa run`](#pandawa-run)
-- [📚 Filosofi Inti](#-filosofi-inti)
-- [🌟 Fase Pengembangan](#-fase-pengembangan)
-- [🎯 Tujuan Eksperimental](#-tujuan-eksperimental)
-- [🔧 Prasyarat](#-prasyarat)
-- [📖 Pelajari Lebih Lanjut](#-pelajari-lebih-lanjut)
-- [🔍 Pemecahan Masalah](#-pemecahan-masalah)
-- [💬 Dukungan](#-dukungan)
-- [📄 Lisensi](#-lisensi)
+- [📚 Core Philosophy](#-core-philosophy)
+- [🌟 Development Phases](#-development-phases)
+- [🎯 Experimental Goals](#-experimental-goals)
+- [🔧 Prerequisites](#-prerequisites)
+- [📖 Learn More](#-learn-more)
+- [🔍 Troubleshooting](#-troubleshooting)
+- [💬 Support](#-support)
+- [📄 License](#-license)
 
-## 🤔 Apa itu Spec-Driven Development?
+## 🤔 What is Spec-Driven Development?
 
-Spec-Driven Development **membalik urutan** yang biasa dipakai dalam pengembangan software. Selama puluhan tahun, kode adalah rajanya — spesifikasi hanyalah perancah yang dibangun lalu dibuang begitu "kerja nyata" menulis kode dimulai. Spec-Driven Development mengubah ini: **spesifikasi menjadi executable**, langsung menghasilkan implementasi yang jalan, bukan sekadar jadi panduan.
+Spec-Driven Development **flips the usual order** of software development. For decades, code was king — specs were just scaffolding built and discarded once the "real work" of writing code began. Spec-Driven Development changes that: **specs become executable**, directly generating working implementations rather than just guiding them.
 
-## ⚡ Memulai
+## ⚡ Getting Started
 
-### 1. Instal CLI Pandawa
+### 1. Install Pandawa CLI
 
-Pilih metode instalasi yang Anda inginkan:
+Choose your preferred installation method:
 
-#### Opsi 1: Instalasi Persisten (Disarankan)
+#### Option 1: Persistent Installation (Recommended)
 
-Instal sekali, pakai di mana saja:
+Install once, use anywhere:
 
 ```bash
 uv tool install pandawa-cli --from git+https://github.com/zasbita/pandawa.git
 ```
 
-Lalu pakai tool-nya langsung:
+Then use the tool directly:
 
 ```bash
-# Buat project baru
-pandawa init <NAMA_PROJECT>
+# Create a new project
+pandawa init <PROJECT_NAME>
 
-# Atau inisialisasi di project yang sudah ada
+# Or initialize in an existing project
 pandawa init . --ai claude
-# atau
+# or
 pandawa init --here --ai claude
 
-# Cek tool yang terinstal
+# Check installed tools
 pandawa check
 ```
 
-Untuk upgrade Pandawa, lihat [Panduan Upgrade](./docs/upgrade.md) untuk instruksi lengkap. Upgrade cepat:
+To upgrade Pandawa, see the [Upgrade Guide](./docs/upgrade.md) for full instructions. Quick upgrade:
 
 ```bash
 uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git
 ```
 
-#### Opsi 2: Pemakaian Sekali Pakai
+#### Option 2: One-off Usage
 
-Jalankan langsung tanpa instalasi:
-
-```bash
-uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <NAMA_PROJECT>
-```
-
-**Keuntungan instalasi persisten:**
-
-- Tool tetap terinstal dan tersedia di PATH
-- Tidak perlu membuat shell alias
-- Manajemen tool lebih baik dengan `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
-- Konfigurasi shell lebih bersih
-
-### 2. Jalankan workflow terpandu (disarankan)
-
-Jalankan asisten AI Anda di direktori project. Command `/pandawa.*` akan tersedia di asisten tersebut.
-
-Cara tercepat dari ide sampai implementasi adalah command **`/pandawa.ultimate`**. Command ini mengorkestrasi seluruh lifecycle — dari menetapkan prinsip project sampai mengeksekusi implementasi — dengan gate konfirmasi di antara tiap fase:
+Run directly without installation:
 
 ```bash
-/pandawa.ultimate Buat aplikasi yang bisa membantu saya mengorganisir foto-foto ke dalam album terpisah
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <PROJECT_NAME>
 ```
 
-Command ini akan:
+**Benefits of persistent installation:**
 
-1. Cek (atau buat) constitution project Anda
-2. Buat spesifikasi fitur dari deskripsi Anda
-3. Opsional: klarifikasi requirement yang ambigu
-4. Menghasilkan technical plan
-5. Memecah plan menjadi task yang bisa dieksekusi
-6. Opsional: menjalankan analisis konsistensi
-7. Mengimplementasikan fitur
+- Tool stays installed and available in PATH
+- No shell alias needed
+- Better tool management with `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
+- Cleaner shell configuration
 
-Anda tetap memegang kendali — setelah setiap fase, Anda bisa memilih **lanjut**, **skip** (untuk fase opsional), atau **stop**.
+### 2. Run guided workflow (recommended)
+
+Run your AI assistant in the project directory. The `/pandawa.*` commands will be available.
+
+The fastest way from idea to implementation is **`/pandawa.ultimate`**. This command orchestrates the full lifecycle — from establishing project principles to executing implementation — with confirmation gates between each phase:
+
+```bash
+/pandawa.ultimate Build an app that helps me organize my photos into separate albums
+```
+
+This command will:
+
+1. Check (or create) your project constitution
+2. Create a feature spec from your description
+3. Optional: clarify ambiguous requirements
+4. Generate a technical plan
+5. Break the plan into executable tasks
+6. Optional: run a consistency analysis
+7. Implement the feature
+
+You stay in control — after each phase you can choose **continue**, **skip** (for optional phases), or **stop**.
 
 > [!TIP]
-> Kalau Anda lebih suka menjalankan tiap fase secara manual, atau butuh kontrol lebih pada tiap langkah, Anda bisa memakai command individual di bawah ini.
+> If you prefer to run each phase manually or need more control at each step, you can use the individual commands below.
 
-### 3. (Alternatif) Command langkah-demi-langkah
+### 3. (Alternative) Step-by-step commands
 
-Kalau Anda lebih suka menjalankan tiap fase satu per satu:
+If you prefer to run each phase one by one:
 
-#### Tetapkan prinsip project
+#### Establish project principles
 
-Gunakan command **`/pandawa.constitution`** untuk membuat prinsip pengaturan dan pedoman pengembangan project Anda yang akan memandu semua pengembangan berikutnya.
-
-```bash
-/pandawa.constitution Buat prinsip yang berfokus pada kualitas kode, standar testing, konsistensi user experience, dan requirement performa
-```
-
-#### Buat spec
-
-Gunakan command **`/pandawa.specify`** untuk mendeskripsikan apa yang ingin Anda bangun. Fokus pada **apa** dan **mengapa**, bukan tech stack.
+Use **`/pandawa.constitution`** to create your project's governing principles and development guidelines that will guide all subsequent development.
 
 ```bash
-/pandawa.specify Buat aplikasi yang bisa membantu saya mengorganisir foto-foto ke dalam album terpisah. Album dikelompokkan berdasarkan tanggal dan bisa diorganisir ulang dengan drag-and-drop di halaman utama. Album tidak pernah bersarang di dalam album lain. Di dalam setiap album, foto di-preview dalam tampilan seperti tile.
+/pandawa.constitution Create principles focused on code quality, testing standards, UX consistency, and performance requirements
 ```
 
-#### Buat technical implementation plan
+#### Create spec
 
-Gunakan command **`/pandawa.plan`** untuk menyediakan tech stack dan pilihan arsitektur Anda.
+Use **`/pandawa.specify`** to describe what you want to build. Focus on **what** and **why**, not tech stack.
 
 ```bash
-/pandawa.plan Aplikasi ini menggunakan Vite dengan jumlah library seminimal mungkin. Gunakan HTML, CSS, dan JavaScript murni sebisa mungkin. Gambar tidak diunggah ke mana pun dan metadata disimpan di database SQLite lokal.
+/pandawa.specify Build an app that helps me organize my photos into separate albums. Albums are grouped by date and can be reorganized with drag-and-drop on the main page. Albums never nest inside other albums. Inside each album, photos are previewed in a tile-like view.
 ```
 
-#### Pecah menjadi task
+#### Create technical implementation plan
 
-Gunakan **`/pandawa.tasks`** untuk membuat daftar task yang actionable dari implementation plan Anda.
+Use **`/pandawa.plan`** to provide your tech stack and architectural choices.
+
+```bash
+/pandawa.plan This app uses Vite with as few libraries as possible. Use plain HTML, CSS, and JavaScript where possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
+```
+
+#### Break into tasks
+
+Use **`/pandawa.tasks`** to generate an actionable task list from your implementation plan.
 
 ```bash
 /pandawa.tasks
 ```
 
-#### Eksekusi implementasi
+#### Execute implementation
 
-Gunakan **`/pandawa.implement`** untuk mengeksekusi semua task dan membangun fitur Anda sesuai plan.
+Use **`/pandawa.implement`** to execute all tasks and build your feature per plan.
 
 ```bash
 /pandawa.implement
 ```
 
-Untuk instruksi langkah-demi-langkah yang lebih rinci, lihat [panduan lengkap](./spec-driven.md) kami.
+For more detailed step-by-step instructions, see our [full guide](./spec-driven.md).
 
-## 🤖 Agen AI yang Didukung
+## 🤖 Supported AI Agents
 
-| Agen                                                                                  | Dukungan | Catatan                                                                                                                                     |
+| Agent                                                                                  | Support | Notes                                                                                                                                     |
 | -------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | [Qoder CLI](https://qoder.com/cli)                                                   | ✅      |                                                                                                                                           |
-| [Amazon Q Developer CLI](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️      | Amazon Q Developer CLI [tidak mendukung](https://github.com/aws/amazon-q-developer-cli/issues/3064) argumen custom untuk slash command. |
+| [Amazon Q Developer CLI](https://aws.amazon.com/developer/learning/q-developer-cli/) | ⚠️      | Amazon Q Developer CLI [does not support](https://github.com/aws/amazon-q-developer-cli/issues/3064) custom arguments for slash commands. |
 | [Amp](https://ampcode.com/)                                                          | ✅      |                                                                                                                                           |
 | [Auggie CLI](https://docs.augmentcode.com/cli/overview)                              | ✅      |                                                                                                                                           |
 | [Claude Code](https://www.anthropic.com/claude-code)                                 | ✅      |                                                                                                                                           |
@@ -178,7 +178,7 @@ Untuk instruksi langkah-demi-langkah yang lebih rinci, lihat [panduan lengkap](.
 | [Cursor](https://cursor.sh/)                                                         | ✅      |                                                                                                                                           |
 | [Gemini CLI](https://github.com/google-gemini/gemini-cli)                            | ✅      |                                                                                                                                           |
 | [GitHub Copilot](https://code.visualstudio.com/)                                     | ✅      |                                                                                                                                           |
-| [IBM Bob](https://www.ibm.com/products/bob)                                          | ✅      | Agen berbasis IDE dengan dukungan slash command                                                                                          |
+| [IBM Bob](https://www.ibm.com/products/bob)                                          | ✅      | IDE-based agent with slash command support                                                                                          |
 | [Kilo Code](https://github.com/Kilo-Org/kilocode)                                    | ✅      |                                                                                                                                           |
 | [opencode](https://opencode.ai/)                                                     | ✅      |                                                                                                                                           |
 | [Qwen Code](https://github.com/QwenLM/qwen-code)                                     | ✅      |                                                                                                                                           |
@@ -186,339 +186,324 @@ Untuk instruksi langkah-demi-langkah yang lebih rinci, lihat [panduan lengkap](.
 | [SHAI (OVHcloud)](https://github.com/ovh/shai)                                       | ✅      |                                                                                                                                           |
 | [Windsurf](https://windsurf.com/)                                                    | ✅      |                                                                                                                                           |
 
-## 🔧 Referensi CLI Pandawa
+## 🔧 Pandawa CLI Reference
 
-Command `pandawa` mendukung opsi-opsi berikut:
+The `pandawa` command supports the following options:
 
-### Command
+### Commands
 
-| Command      | Deskripsi                                                                                                                                             |
+| Command      | Description                                                                                                                                             |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `init`       | Inisialisasi project Pandawa baru dari template terbaru                                                                                                 |
-| `profile`    | Kelola profil domain knowledge — daftar, cek update (`status`), tarik update (`update`), sematkan path lokal                                          |
-| `check`      | Cek `git` plus setiap tool CLI/IDE [agen AI yang didukung](#-agen-ai-yang-didukung) yang terinstal di mesin Anda                                          |
-| `version`    | Tampilkan versi CLI, info platform, dan release template terbaru                                                                                         |
-| `usage`      | Tampilkan pemakaian token Claude Code dan estimasi biaya untuk project saat ini                                                                                 |
-| `governance` | Kelola plugin governance (list, install, uninstall, activate, disable)                                                                                 |
-| `skill`      | Kelola plugin skill (list, install, uninstall, enable, disable)                                                                                        |
-| `run`        | Jalankan skill `/pandawa.*` lewat Claude Code dari terminal                                                                                                 |
+| `init`       | Initialize a new Pandawa project from the latest template                                                                                                 |
+| `profile`    | Manage domain knowledge profiles — list, check update (`status`), pull update (`update`), pin local path                                          |
+| `check`      | Check `git` plus every supported [AI agent](#-supported-ai-agents) CLI/IDE tool installed on your machine                                          |
+| `version`    | Show CLI version, platform info, and latest template release                                                                                         |
+| `usage`      | Show Claude Code token usage and cost estimate for the current project                                                                                 |
+| `governance` | Manage governance plugins (list, install, uninstall, activate, disable)                                                                                 |
+| `skill`      | Manage skill plugins (list, install, uninstall, enable, disable)                                                                                        |
+| `run`        | Run `/pandawa.*` skills via Claude Code from the terminal                                                                                                 |
 
-Setiap command mencetak panel **Process Audit** kecil ketika selesai (durasi, dan untuk command berbasis AI, pemakaian token/estimasi biaya) dan menambahkan record JSON-lines ke `.pandawa/audit.log` di project (atau `~/.config/pandawa/audit.log` jika dijalankan di luar sebuah project). Ini hanyalah log lokal yang informatif untuk pencatatan Anda sendiri — tidak ada yang dikirim ke mana pun. `pandawa usage` membaca data sesi yang sama untuk merangkum biaya lintas sesi atau command.
+Each command prints a small **Process Audit** panel when finished (duration, and for AI-based commands, token usage/cost estimate) and appends a JSON-lines record to `.pandawa/audit.log` in the project (or `~/.config/pandawa/audit.log` when run outside a project). This is purely an informative local log for your own records — nothing is sent anywhere. `pandawa usage` reads the same session data to summarize costs across sessions or commands.
 
-### Profil Domain
+### Domain Profiles
 
-Profil adalah **overlay domain knowledge** yang mengajarkan agen AI Anda standar, pattern, dan keputusan arsitektur dari domain tertentu — tanpa mengubah template dasar Anda.
+Profiles are **domain knowledge overlays** that teach your AI agent standards, patterns, and architectural decisions for a specific domain — without changing your base template.
 
 > [!NOTE]
-> Profil diterapkan lewat `pandawa init`, bukan lewat command `pandawa profile install` yang terpisah — `pandawa profile` punya `list`, `refresh`, `set-local`, `status`, dan `update` (lihat di bawah).
+> Profiles are applied via `pandawa init`, not via a separate `pandawa profile install` command — `pandawa profile` has `list`, `refresh`, `set-local`, `status`, and `update` (see below).
 
-Terapkan sebuah profil saat Anda menginisialisasi project baru:
+Apply a profile when you initialize a new project:
 
 ```bash
 pandawa init my-project --ai claude --profile tmforum-oda
 ```
 
-Atau saat menjalankan `pandawa init` secara interaktif (tanpa flag `--profile`), Anda akan diminta memilih dari menu arrow-key.
+Or when running `pandawa init` interactively (without `--profile`), you will be prompted to choose from an arrow-key menu.
 
-Untuk menambahkan profil ke project yang sudah diinisialisasi tanpa profil, jalankan ulang `init` di tempat:
+To add a profile to an already-initialized project, re-run `init` in place:
 
 ```bash
 pandawa init --here --force --ai claude --profile tmforum-oda
 ```
 
-Folder profil diambil langsung dari git (`main`, tanpa perlu release CLI) dan diekstrak ke `.pandawa/profiles/<profile-id>/`. File instruksi agen AI Anda otomatis diperbarui untuk membaca constitution-nya dan mengikuti standarnya.
+Profile folders are fetched live from git (`main`, no CLI release needed) and extracted to `.pandawa/profiles/<profile-id>/`. Your AI agent's instruction file is automatically updated to load its constitution and follow its standards.
 
-#### Profil yang Tersedia
+#### Available Profiles
 
-| ID Profil | Nama | Deskripsi |
+| Profile ID | Name | Description |
 | --- | --- | --- |
-| `tmforum-oda` | TM Forum ODA Constitution | Framework constitution TM Forum Open Digital Architecture yang reusable: API governance, DDD, CQRS, pattern event-driven untuk sistem BSS/OSS |
-| `tmforum-oda-door-v3` | TM Forum ODA Design DOOR v3 | Semua yang ada di `tmforum-oda`, plus design system DOOR v3 — NestJS, CQRS, React MFE, Module Federation |
-| `pegadaian` | Pegadaian Support Service Constitution | Constitution NestJS backend + Vue 3 Module Federation frontend untuk layanan tim AI Pegadaian. **Status: Draft** — lihat Known Gaps di `constitution/00-index.md` milik profil ini sebelum dianggap mengikat |
+| `tmforum-oda` | TM Forum ODA Constitution | Reusable TM Forum Open Digital Architecture constitution framework: API governance, DDD, CQRS, event-driven patterns for BSS/OSS systems |
+| `tmforum-oda-door-v3` | TM Forum ODA Design DOOR v3 | Everything in `tmforum-oda`, plus DOOR v3 design system — NestJS, CQRS, React MFE, Module Federation |
+| `pegadaian` | Pegadaian Support Service Constitution | NestJS backend + Vue 3 Module Federation frontend constitution for Pegadaian AI team services. **Status: Draft** — see Known Gaps in `constitution/00-index.md` before treating as binding |
 
-Jalankan `pandawa profile list` kapan saja untuk melihat kumpulan ID dan nama profil yang tersedia saat ini (tabel ini bisa berubah seiring bertambahnya profil baru — daftar dari CLI adalah sumber kebenarannya). Jalankan `pandawa profile refresh` untuk menyinkronkan katalog lokal dengan `main` — profil akan muncul di sini begitu ter-merge, tanpa perlu release CLI.
+Run `pandawa profile list` anytime to see the current set of known profile IDs and names (this table may change as new profiles are added — the CLI list is the source of truth). Run `pandawa profile refresh` to sync the local catalog with `main` — profiles appear here as soon as they merge, without a CLI release.
 
-#### Menambahkan profil baru (self-service)
+#### Adding a new profile (self-service)
 
-Profil berada di repo **`pandawa-marketplace-tooling`** (`https://github.com/zasbita/pandawa-marketplace-tooling.git`), bersebelahan dengan plugin skill/agent, sebagai konsep top-level yang terpisah — satu repo, satu alur kontribusi, satu job validasi CI untuk keduanya. Menambahkan profil sepenuhnya self-service — tanpa perubahan kode CLI, tanpa release CLI, tanpa langkah packaging:
+Profiles live in the **`pandawa-marketplace-tooling`** repo (`https://github.com/zasbita/pandawa-marketplace-tooling.git`), alongside skill/agent plugins as a separate top-level concept — one repo, one contribution flow, one CI validation job for both. Adding a profile is fully self-service — no CLI code change, no CLI release, no packaging step:
 
-1. Di clone `pandawa-marketplace-tooling`, tambahkan folder di `profiles/<profil-anda>/` dengan manifest `profile.json` (`{"id", "name", "description"}`) plus `constitution/`, `architecture/`, `governance/`, `validation/`, `prompts/`, `SKILL.md`, dst milik Anda sendiri — termasuk stack frontend apa pun yang menjadi target profil Anda.
-2. Tambahkan satu entri `{"id": "<id-anda>", "path": "profiles/<profil-anda>"}` ke `profiles.json` di root repo tersebut — ini satu-satunya file bersama yang Anda sentuh, dan memakai pola registrasi satu-baris yang sama seperti `.claude-plugin/marketplace.json`.
-3. Jalankan `python tools/validate-marketplace.py .` di sana, lalu buka merge request (lihat `CONTRIBUTING.md`/`CODEOWNERS` repo tersebut). Begitu ter-merge ke `main`, `pandawa init --profile <id-anda>` langsung berfungsi untuk semua orang — `pandawa` mengambil folder profil Anda secara live lewat GitLab repository-archive API, tanpa langkah zip/release/CI di repo ini.
+1. In your clone of `pandawa-marketplace-tooling`, add a folder at `profiles/<your-profile>/` with a manifest `profile.json` (`{"id", "name", "description"}`) plus your `constitution/`, `architecture/`, `governance/`, `validation/`, `prompts/`, `SKILL.md`, etc. — including whatever frontend stack your profile targets.
+2. Add one entry `{"id": "<your-id>", "path": "profiles/<your-profile>"}` to `profiles.json` at the repo root — this is the only shared file you touch, and it uses the same one-line registration pattern as `.claude-plugin/marketplace.json`.
+3. Run `python tools/validate-marketplace.py .` there, then open a merge request (see that repo's `CONTRIBUTING.md`/`CODEOWNERS`). Once merged to `main`, `pandawa init --profile <your-id>` works for everyone — `pandawa` fetches your profile folder live via the repository-archive API, with no zip/release/CI step in this repo.
 
-Sebelum merge, uji dulu secara lokal terhadap clone Anda dengan `pandawa init --profile <id-anda> --profile-path <path-ke-clone-anda>/profiles/<profil-anda>` (melewati pengecekan katalog sepenuhnya, karena sumbernya sudah eksplisit).
+Before merging, test locally against your clone with `pandawa init --profile <your-id> --profile-path <path-to-your-clone>/profiles/<your-profile>` (bypasses the catalog check entirely since the source is explicit).
 
 > [!TIP]
-> Untuk panduan kolaborasi lengkap dari awal sampai akhir (keputusan plugin vs profil, anatomi lengkap folder domain-profile, CODEOWNERS, aturan breaking-change), lihat [`pandawa-marketplace-tooling/docs/PANDUAN-KOLABORASI.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/docs/PANDUAN-KOLABORASI.md), atau [dokumen Marketplace](docs/marketplace.md) milik repo ini sendiri.
+> For a full end-to-end collaboration guide (plugin vs profile decision, complete domain-profile folder anatomy, CODEOWNERS, breaking-change rules), see [`pandawa-marketplace-tooling/docs/COLLABORATION-GUIDE.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/docs/COLLABORATION-GUIDE.md), or this repo's [Marketplace docs](docs/marketplace.md).
 
-#### Apa yang diinstal oleh sebuah profil
+#### What gets installed by a profile
 
 ```text
 .pandawa/
 └── profiles/
     └── tmforum-oda/
-        ├── SKILL.md                  ← Definisi sub-agent (Claude)
-        ├── constitution/             ← 16 file hukum engineering (MUST/SHOULD/MUST NOT)
-        ├── architecture/             ← Pattern ODA Canvas, tabel referensi
-        ├── governance/               ← Aturan governance repository & PR
-        ├── prompts/                  ← Prompt agen siap-pakai untuk generasi backend/frontend
-        ├── templates/                ← Template scaffolding module
-        ├── validation/               ← Rule book untuk API, backend, frontend
-        └── recommendations/          ← Template gap analysis & migration roadmap
+        ├── SKILL.md                  ← Sub-agent definition (Claude)
+        ├── constitution/             ← 16 engineering law files (MUST/SHOULD/MUST NOT)
+        ├── architecture/             ← ODA Canvas patterns, reference tables
+        ├── governance/               ← Repository & PR governance rules
+        ├── prompts/                  ← Ready-to-use agent prompts for backend/frontend generation
+        ├── templates/                ← Module scaffolding templates
+        ├── validation/               ← Rule book for API, backend, frontend
+        └── recommendations/          ← Gap analysis & migration roadmap templates
 ```
 
-File instruksi agen AI Anda (`CLAUDE.md`, `GEMINI.md`, dst) diperbarui agar selalu memuat constitution profil di setiap sesi. Untuk Claude, sub-agent `.claude/agents/<profile-id>.md` juga diinstal untuk dipakai sesuai kebutuhan.
+Your AI agent's instruction file (`CLAUDE.md`, `GEMINI.md`, etc.) is updated to always load the profile constitution in every session. For Claude, a sub-agent `.claude/agents/<profile-id>.md` is also installed for on-demand use.
 
 > [!NOTE]
-> Folder `governance/` milik sebuah profil tidak berhubungan dengan command [`pandawa governance`](#pandawa-governance) di bawah — kata yang sama, konsep yang berbeda. `governance/` milik profil adalah dokumen referensi statis (aturan repo/PR) yang disalin agar bisa dibaca agen; ini tidak pernah terdaftar di governance guard dan tidak punya enforcement apa pun di baliknya. `pandawa governance` adalah sistem plugin Claude Code yang berbeda dan saling eksklusif, dilengkapi hook runtime nyata yang bisa memblokir pemakaian tool. Menginstal sebuah profil tidak menginstal atau mengaktifkan plugin governance apa pun.
+> A profile's `governance/` folder is unrelated to the [`pandawa governance`](#pandawa-governance) command below — same word, different concept. A profile's `governance/` is static reference docs (repo/PR rules) copied for the agent to read; it is never registered in the governance guard and has no runtime enforcement. `pandawa governance` is a different, mutually exclusive Claude Code plugin system with real `PreToolUse` hook guards that can block tool use. Installing a profile does not install or activate any governance plugin.
 
-### `pandawa profile` — daftar, cek update, & sematkan profil lokal
+### `pandawa profile` — list, check update, & pin local profile
 
-| Subcommand | Deskripsi |
+| Subcommand | Description |
 | ---------- | ----------- |
-| `list` | Daftar semua ID/nama/versi profil yang dikenal (dengan refresh best-effort terlebih dahulu), plus path lokal jika ada yang disematkan lewat `set-local` |
-| `refresh` | Sinkronkan katalog profil lokal dari `profiles.json` milik `pandawa-marketplace-tooling` di `main`, tanpa bergantung pada release CLI apa pun |
-| `status` | Di dalam sebuah project: bandingkan versi profil yang ter-install (`.pandawa/profile-lock.json`) dengan versi terbaru di katalog, tandai mana yang "update available" |
-| `update <key>` | Di dalam sebuah project: ambil ulang isi profil `<key>` dari `main` (atau `--profile-path` lokal), timpa `.pandawa/profiles/<key>/`, dan perbarui lockfile |
-| `set-local <key> <path>` | Sematkan direktori lokal sebagai sumber sebuah profil, sehingga `pandawa init --profile <key>` memakainya alih-alih mengunduh dari GitLab (berguna saat menulis/menguji sebuah profil) |
+| `list` | List all known profile IDs/names/versions (with best-effort refresh first), plus local path if any pinned via `set-local` |
+| `refresh` | Sync local profile catalog from `profiles.json` in `pandawa-marketplace-tooling` on `main`, independent of any CLI release |
+| `status` | Inside a project: compare installed profile version (`.pandawa/profile-lock.json`) with the latest in the catalog, flagging which is "update available" |
+| `update <key>` | Inside a project: re-fetch profile `<key>` content from `main` (or `--profile-path` local), overwrite `.pandawa/profiles/<key>/`, and update lockfile |
+| `set-local <key> <path>` | Pin a local directory as a profile source so `pandawa init --profile <key>` uses it instead of downloading from Git (useful when authoring/testing a profile) |
 
 ```bash
-# Lihat profil yang tersedia (beserta versi terbaru masing-masing)
+# See available profiles (with their latest versions)
 pandawa profile list
 
-# Di dalam project yang sudah punya profil ter-install: cek apakah ada update
+# Inside a project with installed profiles: check for updates
 pandawa profile status
 
-# Tarik update tersebut
+# Pull that update
 pandawa profile update tmforum-oda
 
-# Arahkan sebuah profil ke direktori lokal alih-alih mengunduhnya
+# Point a profile to a local directory instead of downloading
 pandawa profile set-local tmforum-oda-door-v3 ../pandawa-marketplace-tooling/profiles/tmforum-oda-door-v3
 ```
 
 > [!NOTE]
-> `version` di `profile.json` **bukan** mekanisme pin — `pandawa init --profile` dan
-> `pandawa profile update` selalu mengambil `main` yang terkini. Versi ini murni untuk
-> visibilitas: `pandawa` mencatat versi yang ter-install di `.pandawa/profile-lock.json`
-> tiap project, dan `pandawa profile status` membandingkannya dengan katalog supaya
-> update yang sudah di-merge ke `pandawa-marketplace-tooling` benar-benar **keliatan**,
-> bukan cuma berubah diam-diam di `main`.
+> `version` in `profile.json` is **not** a pin mechanism — `pandawa init --profile` and
+> `pandawa profile update` always fetch the current `main`. This version is purely for
+> visibility: `pandawa` records the installed version in `.pandawa/profile-lock.json`
+> per project, and `pandawa profile status` compares it with the catalog so
+> updates merged to `pandawa-marketplace-tooling` are actually **visible**,
+> not silently changed on `main`.
 
-### Argumen & Opsi `pandawa init`
+### `pandawa init` Arguments & Options
 
-| Argumen/Opsi | Tipe | Deskripsi |
+| Argument/Option | Type | Description |
 | --------------- | ---- | ----------- |
-| `<project-name>` | Argumen | Nama untuk direktori project baru Anda (opsional jika memakai `--here`, atau pakai `.` untuk direktori saat ini) |
-| `--ai` | Opsi | Asisten AI yang dipakai: `claude`, `gemini`, `copilot`, `cursor-agent`, `qwen`, `opencode`, `codex`, `windsurf`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, `shai`, `q`, `bob`, atau `qoder` |
-| `--script` | Opsi | Varian script yang dipakai: `sh` (bash/zsh) atau `ps` (PowerShell) |
-| `--ignore-agent-tools` | Flag | Skip pengecekan tool agen AI seperti Claude Code |
-| `--no-git` | Flag | Skip inisialisasi repository git |
-| `--here` | Flag | Inisialisasi project di direktori saat ini alih-alih membuat direktori baru |
-| `--force` | Flag | Paksa merge/overwrite saat memakai `--here` (skip konfirmasi) — juga cara Anda menerapkan ulang `init` (mis. untuk menambahkan `--profile`) ke project yang sudah diinisialisasi |
-| `--skip-tls` | Flag | Skip verifikasi SSL/TLS (tidak disarankan) |
-| `--debug` | Flag | Tampilkan output diagnostik verbose untuk kegagalan network dan ekstraksi |
-| `--gitlab-token` | Opsi | Token GitLab untuk request API (atau set variabel environment `GL_TOKEN`) — release template (repo ini) dan konten profil (`pandawa-marketplace-tooling`) sama-sama dihosting di GitLab, bukan GitHub |
-| `--profile` | Opsi | Profil domain yang diterapkan (mis. `tmforum-oda`) — lihat [Profil Domain](#profil-domain) |
-| `--profile-path` | Opsi | Pakai direktori lokal sebagai sumber profil alih-alih mengunduh (development/testing) |
-| `--no-marketplace` | Flag | Skip pendaftaran marketplace plugin Pandawa di project (khusus Claude) |
-| `--marketplace-url` | Opsi | Override URL git marketplace Pandawa (atau set `PANDAWA_MARKETPLACE_URL`) |
-| `--no-guardrails` | Flag | Skip penulisan guardrail permission deny-first baseline ke `.claude/settings.json` (khusus Claude) |
-| `--no-claude-md` | Flag | Skip scaffolding file starter `CLAUDE.md` untuk konteks project |
+| `<project-name>` | Argument | Name for your new project's directory (optional if using `--here`, or use `.` for current directory) |
+| `--ai` | Option | AI assistant to use: `claude`, `gemini`, `copilot`, `cursor-agent`, `qwen`, `opencode`, `codex`, `windsurf`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, `shai`, `q`, `bob`, or `qoder` |
+| `--script` | Option | Script variant to use: `sh` (bash/zsh) or `ps` (PowerShell) |
+| `--ignore-agent-tools` | Flag | Skip AI agent tool checks like Claude Code |
+| `--no-git` | Flag | Skip git repository initialization |
+| `--here` | Flag | Initialize project in current directory instead of creating a new one |
+| `--force` | Flag | Force merge/overwrite when using `--here` (skip confirmation) — also how you re-apply `init` (e.g., to add `--profile`) to an already-initialized project |
+| `--skip-tls` | Flag | Skip SSL/TLS verification (not recommended) |
+| `--debug` | Flag | Show verbose diagnostic output for network and extraction failures |
+| `--gitlab-token` | Option | GitLab token for API requests (or set env `GL_TOKEN`) — also used as fallback for private GitLab instances; public GitHub install needs no token |
+| `--profile` | Option | Domain profile to apply (e.g., `tmforum-oda`) — see [Domain Profiles](#domain-profiles) |
+| `--profile-path` | Option | Use a local directory as profile source instead of downloading (development/testing) |
+| `--no-marketplace` | Flag | Skip Pandawa plugin marketplace registration in project (Claude only) |
+| `--marketplace-url` | Option | Override Pandawa marketplace git URL (or set `PANDAWA_MARKETPLACE_URL`) |
+| `--no-guardrails` | Flag | Skip writing baseline deny-first permission guardrails to `.claude/settings.json` (Claude only) |
+| `--no-claude-md` | Flag | Skip scaffolding starter `CLAUDE.md` project context file |
 
-### Contoh
+### Examples
 
 ```bash
-# Inisialisasi project dasar
+# Initialize a basic project
 pandawa init my-project
 
-# Inisialisasi dengan asisten AI tertentu
+# Initialize with a specific AI assistant
 pandawa init my-project --ai claude
-
-# Inisialisasi dengan dukungan Cursor
 pandawa init my-project --ai cursor-agent
-
-# Inisialisasi dengan dukungan Qoder
 pandawa init my-project --ai qoder
-
-# Inisialisasi dengan dukungan Windsurf
 pandawa init my-project --ai windsurf
-
-# Inisialisasi dengan dukungan Amp
 pandawa init my-project --ai amp
-
-# Inisialisasi dengan dukungan SHAI
 pandawa init my-project --ai shai
-
-# Inisialisasi dengan dukungan IBM Bob
 pandawa init my-project --ai bob
 
-# Inisialisasi dengan script PowerShell (Windows/cross-platform)
+# Initialize with PowerShell scripts (Windows/cross-platform)
 pandawa init my-project --ai copilot --script ps
 
-# Inisialisasi di direktori saat ini
+# Initialize in current directory
 pandawa init . --ai copilot
-# atau pakai flag --here
+# or use --here flag
 pandawa init --here --ai copilot
 
-# Paksa merge ke direktori saat ini (tidak kosong) tanpa konfirmasi
+# Force merge into a non-empty current directory without confirmation
 pandawa init . --force --ai copilot
-# atau
+# or
 pandawa init --here --force --ai copilot
 
-# Skip inisialisasi git
+# Skip git initialization
 pandawa init my-project --ai gemini --no-git
 
-# Aktifkan output debug untuk troubleshooting
+# Enable debug output for troubleshooting
 pandawa init my-project --ai claude --debug
 
-# Pakai token GitLab untuk request API (berguna untuk environment korporat/instance privat)
-pandawa init my-project --ai claude --gitlab-token glpat_your_token_here
-
-# Cek requirement sistem
+# Check system requirements
 pandawa check
 
-# Inisialisasi dengan profil domain TM Forum ODA
+# Initialize with TM Forum ODA domain profile
 pandawa init my-project --ai claude --profile tmforum-oda
 
-# Tambahkan profil ke project yang sudah ada di direktori saat ini
+# Add a profile to an existing project in the current directory
 pandawa init --here --force --ai claude --profile tmforum-oda
 ```
 
-![Specify CLI bootstrapping a new project in the terminal](./media/pandawa_cli.gif)
+![Pandawa CLI bootstrapping a new project](./media/pandawa_cli.gif)
 
 ---
 
 ### `pandawa usage`
 
-Tampilkan pemakaian token Claude Code dan estimasi biaya untuk project saat ini. Membaca riwayat sesi dari `~/.claude/projects/` dan mengagregasi token input/output/cache, jumlah turn, model, dan estimasi biaya per sesi.
+Show Claude Code token usage and cost estimate for the current project. Reads session history from `~/.claude/projects/` and aggregates input/output/cache tokens, turn counts, model, and cost per session.
 
 ```bash
-# Tampilkan 10 sesi terakhir (default)
+# Show last 10 sessions (default)
 pandawa usage
 
-# Tampilkan semua sesi
+# Show all sessions
 pandawa usage --limit 0
 
-# Tampilkan breakdown per-command dengan biaya dan durasi
+# Show per-command breakdown with cost and duration
 pandawa usage --commands
 
-# Tampilkan metrik delivery gaya AI-DLC (predictability, cycle time, phase mix)
+# Show AI-DLC style delivery metrics (predictability, cycle time, phase mix)
 pandawa usage --delivery
 
-# Tampilkan pemakaian untuk direktori project tertentu
+# Show usage for a specific project directory
 pandawa usage --cwd /path/to/my-project
 ```
 
-| Opsi | Deskripsi |
+| Option | Description |
 | ------ | ----------- |
-| `--limit`, `-n` | Jumlah sesi terbaru yang ditampilkan (default: `10`, `0` = semua) |
-| `--cwd` | Direktori project untuk membaca sesi (default: direktori saat ini) |
-| `--commands`, `-c` | Tampilkan breakdown per-command `/pandawa.*` dengan biaya dan durasi |
-| `--delivery`, `-d` | Tampilkan metrik delivery gaya AI-DLC: **predictability rate** (task selesai vs direncanakan di `tasks.md`, target >80%), **cycle time** end-to-end, dan **phase mix** per command. Metrik yang butuh baseline A/B (peningkatan velocity vs non-AI, defect rate ternormalisasi) sengaja tidak dikarang — dilaporkan apa adanya sebagai butuh pembanding |
+| `--limit`, `-n` | Number of recent sessions to show (default: `10`, `0` = all) |
+| `--cwd` | Project directory to read sessions from (default: current directory) |
+| `--commands`, `-c` | Show per-command `/pandawa.*` breakdown with cost and duration |
+| `--delivery`, `-d` | Show AI-DLC style delivery metrics: **predictability rate** (tasks completed vs planned in `tasks.md`, target >80%), **cycle time** end-to-end, and **phase mix** per command. Metrics that need an A/B baseline (velocity vs non-AI, defect rate normalized) are intentionally not fabricated — reported honestly as needing a comparator |
 
 ---
 
 ### `pandawa version`
 
-Tampilkan versi CLI, info platform, dan release template terbaru dari registry.
+Show CLI version, platform info, and latest template release from the registry.
 
 ```bash
 pandawa version
 ```
 
-| Opsi | Deskripsi |
+| Option | Description |
 | ------ | ----------- |
-| `--gitlab-token` | Token GitLab (atau set variabel environment `GL_TOKEN` / `GITLAB_TOKEN`) |
+| `--gitlab-token` | GitLab token (or set env `GL_TOKEN` / `GITLAB_TOKEN`) — optional, GitHub public releases need no token |
 
 ---
 
 ### `pandawa governance`
 
-Kelola **plugin governance** — plugin yang menegakkan aturan dan constitution project secara menyeluruh. Hanya satu plugin governance yang boleh aktif dalam satu waktu.
+Manage **governance plugins** — plugins that enforce project-wide rules and constitution. Only one governance plugin may be active at a time.
 
 > [!NOTE]
-> Jangan disamakan dengan folder `governance/` milik sebuah profil (lihat [Apa yang diinstal oleh sebuah profil](#apa-yang-diinstal-oleh-sebuah-profil)) — itu konten referensi statis yang dibundel bersama profil domain, tanpa enforcement runtime. Command ini mengelola tipe plugin yang berbeda dan terpisah: plugin Claude Code yang bisa diinstal, dilengkapi hook guard `PreToolUse` yang secara aktif memblokir pemakaian tool jika invariant satu-aktif dilanggar.
+> Not to be confused with a profile's `governance/` folder (see [What gets installed by a profile](#what-gets-installed-by-a-profile)) — that is static reference content bundled with a domain profile, with no runtime enforcement. This command manages a different, mutually exclusive type: installable Claude Code plugins with real `PreToolUse` guard hooks that can block tool use if the one-active invariant is violated.
 
 ```bash
-# Daftar plugin governance yang terinstal lokal
+# List locally installed governance plugins
 pandawa governance list
 
-# Daftar semua plugin governance yang tersedia (terinstal + marketplace)
+# List all available governance plugins (installed + marketplace)
 pandawa governance list marketplace
 
-# Sinkronkan katalog dari marketplace
+# Sync catalog from marketplace
 pandawa governance refresh
 
-# Unduh plugin governance ke local store
+# Download a governance plugin to local store
 pandawa governance install tmf-oda-constitution
 
-# Aktifkan plugin governance
+# Activate a governance plugin
 pandawa governance use tmf-oda-constitution
 
-# Tampilkan plugin governance mana yang sedang aktif
+# Show which governance plugin is currently active
 pandawa governance status
 
-# Nonaktifkan plugin governance yang aktif
+# Deactivate the active governance plugin
 pandawa governance disable
 
-# Hapus plugin governance dari local store
+# Remove a governance plugin from local store
 pandawa governance uninstall tmf-oda-constitution
 ```
 
-| Subcommand | Deskripsi |
+| Subcommand | Description |
 | ---------- | ----------- |
-| `list [marketplace]` | Daftar plugin governance yang terinstal lokal; tambahkan `marketplace` untuk menyertakan semua yang tersedia |
-| `refresh` | Sinkronkan katalog governance dari marketplace |
-| `install <name>` | Unduh plugin governance ke local store (tidak mengaktifkannya) |
-| `uninstall <name>` | Hapus plugin governance dari local store |
-| `use <name>` | Aktifkan plugin governance (menonaktifkan yang sebelumnya aktif) |
-| `status` | Tampilkan plugin governance yang sedang aktif |
-| `disable [name]` | Nonaktifkan plugin governance yang aktif (atau yang disebutkan namanya) |
+| `list [marketplace]` | List locally installed governance plugins; add `marketplace` to include all available |
+| `refresh` | Sync governance catalog from marketplace |
+| `install <name>` | Download governance plugin to local store (without activating) |
+| `uninstall <name>` | Remove governance plugin from local store |
+| `use <name>` | Activate a governance plugin (deactivating any previously active) |
+| `status` | Show the currently active governance plugin |
+| `disable [name]` | Deactivate the active governance plugin (or the named one) |
 
 ---
 
 ### `pandawa skill`
 
-Kelola **plugin skill** — kemampuan on-demand yang memperluas apa yang bisa dilakukan agen AI Anda. Beberapa skill bisa aktif secara bersamaan.
+Manage **skill plugins** — on-demand capabilities that extend what your AI agent can do. Multiple skills can be active at once.
 
 ```bash
-# Daftar skill yang terinstal lokal
+# List locally installed skills
 pandawa skill list
 
-# Daftar semua skill yang tersedia (terinstal + marketplace)
+# List all available skills (installed + marketplace)
 pandawa skill list marketplace
 
-# Unduh dan aktifkan sebuah skill
+# Download and activate a skill
 pandawa skill install neuron-plan
 
-# Aktifkan skill yang sudah terinstal
+# Activate an already-installed skill
 pandawa skill enable neuron-plan
 
-# Nonaktifkan sebuah skill (tetap terinstal)
+# Deactivate a skill (keep installed)
 pandawa skill disable neuron-plan
 
-# Hapus sebuah skill dari local store
+# Remove a skill from local store
 pandawa skill uninstall neuron-plan
 ```
 
-| Subcommand | Deskripsi |
+| Subcommand | Description |
 | ---------- | ----------- |
-| `list [marketplace]` | Daftar skill yang terinstal lokal; tambahkan `marketplace` untuk menyertakan semua yang tersedia |
-| `install <name>` | Unduh plugin skill dan langsung aktifkan |
-| `uninstall <name>` | Hapus plugin skill dari local store |
-| `enable <name>` | Aktifkan plugin skill yang sudah terinstal |
-| `disable <name>` | Nonaktifkan plugin skill tanpa menghapus instalasinya |
+| `list [marketplace]` | List locally installed skills; add `marketplace` to include all available |
+| `install <name>` | Download skill plugin and activate immediately |
+| `uninstall <name>` | Remove skill plugin from local store |
+| `enable <name>` | Activate an already-installed skill plugin |
+| `disable <name>` | Deactivate a skill plugin without removing it |
 
 ---
 
 ### `pandawa run`
 
-Jalankan skill `/pandawa.*` langsung lewat Claude Code dari terminal — berguna untuk scripting atau pipeline CI.
+Run `/pandawa.*` skills directly via Claude Code from the terminal — useful for scripting or CI.
 
 ```bash
-pandawa run constitution "Buat REST API untuk aplikasi todo"
-pandawa run brd "fokus pada modul billing"
-pandawa run specify "autentikasi user dengan OAuth2"
+pandawa run constitution "Create REST API for a todo app"
+pandawa run brd "focus on billing module"
+pandawa run specify "user authentication with OAuth2"
 pandawa run plan
 pandawa run clarify
 pandawa run tasks
@@ -526,266 +511,266 @@ pandawa run implement
 pandawa run analyze
 pandawa run checklist
 pandawa run test src/
-pandawa run redesign "form create Projected Cost, ikuti file desain baru"
-pandawa run deploy "siapkan pipeline staging"
-pandawa run operate "wire observability untuk service billing"
-pandawa run postmortem "insiden latency spike di endpoint orders"
+pandawa run redesign "form create Projected Cost, follow new design file"
+pandawa run deploy "prepare staging pipeline"
+pandawa run operate "wire observability for billing service"
+pandawa run postmortem "latency spike incident on orders endpoint"
 ```
 
-| Subcommand | Deskripsi |
+| Subcommand | Description |
 | ---------- | ----------- |
-| `constitution [goal]` | Jalankan `/pandawa.constitution` — buat atau perbarui prinsip pengaturan project |
-| `brd [scope]` | Jalankan `/pandawa.brd` — reverse-engineer BRD dari codebase yang sudah ada |
-| `specify [goal]` | Jalankan `/pandawa.specify` — definisikan requirement dan user story |
-| `plan [goal]` | Jalankan `/pandawa.plan` — buat technical implementation plan |
-| `tasks [goal]` | Jalankan `/pandawa.tasks` — generate daftar task yang actionable |
-| `implement [goal]` | Jalankan `/pandawa.implement` — eksekusi task untuk membangun fitur |
-| `clarify [goal]` | Jalankan `/pandawa.clarify` — klarifikasi requirement yang underspecified |
-| `analyze [goal]` | Jalankan `/pandawa.analyze` — analisis konsistensi & coverage lintas-artefak |
-| `checklist [goal]` | Jalankan `/pandawa.checklist` — generate checklist kualitas |
-| `test [path]` | Jalankan `/pandawa.test` — generate test, jalankan pengecekan kualitas kode, dan laporkan bug |
-| `redesign [target]` | Jalankan `/pandawa.redesign` — rework satu bagian dari fitur yang sudah terimplementasi secara incremental |
-| `deploy [scope]` | Jalankan `/pandawa.deploy` — siapkan otomasi deployment (containerization, pipeline CI/CD, config) |
-| `operate [mode]` | Jalankan `/pandawa.operate` — wire observability, analisis telemetry/anomali, dan penyelesaian insiden |
-| `postmortem [insiden]` | Jalankan `/pandawa.postmortem` — ubah insiden/pembelajaran produksi menjadi update spec & constitution |
+| `constitution [goal]` | Run `/pandawa.constitution` — create or update project governing principles |
+| `brd [scope]` | Run `/pandawa.brd` — reverse-engineer BRD from existing codebase |
+| `specify [goal]` | Run `/pandawa.specify` — define requirements and user stories |
+| `plan [goal]` | Run `/pandawa.plan` — create technical implementation plan |
+| `tasks [goal]` | Run `/pandawa.tasks` — generate actionable task list |
+| `implement [goal]` | Run `/pandawa.implement` — execute tasks to build feature |
+| `clarify [goal]` | Run `/pandawa.clarify` — clarify underspecified requirements |
+| `analyze [goal]` | Run `/pandawa.analyze` — cross-artifact consistency & coverage analysis |
+| `checklist [goal]` | Run `/pandawa.checklist` — generate custom quality checklist |
+| `test [path]` | Run `/pandawa.test` — generate tests, run code quality checks, and report bugs |
+| `redesign [target]` | Run `/pandawa.redesign` — incrementally rework a part of an already-implemented feature |
+| `deploy [scope]` | Run `/pandawa.deploy` — prepare deployment automation (containerization, CI/CD, config) |
+| `operate [mode]` | Run `/pandawa.operate` — wire observability, analyze telemetry/anomalies, and resolve incidents |
+| `postmortem [incident]` | Run `/pandawa.postmortem` — turn production incidents/learnings into spec & constitution updates |
 
 ---
 
-### Command Slash yang Tersedia
+### Available Slash Commands
 
-Setelah menjalankan `pandawa init`, agen coding AI Anda akan punya akses ke slash command berikut untuk pengembangan yang terstruktur:
+After running `pandawa init`, your AI coding agent will have access to the following slash commands for structured development:
 
-#### Command Workflow
+#### Workflow Command
 
-Jalankan seluruh lifecycle SDD dalam satu sesi terpandu:
+Run the full SDD lifecycle in a single guided session:
 
-| Command | Deskripsi |
+| Command | Description |
 | --- | --- |
-| `/pandawa.ultimate` | Orkestrator end-to-end — menjalankan constitution sampai implementasi dengan gate konfirmasi di antara tiap fase. Mendeteksi artefak yang sudah ada dan menawarkan untuk melanjutkan dari titik terakhir |
+| `/pandawa.ultimate` | End-to-end orchestrator — runs constitution through implementation with confirmation gates between each phase. Detects existing artifacts and offers to continue from the last checkpoint |
 
 ```bash
-/pandawa.ultimate Buat aplikasi yang membantu saya mengorganisir foto ke dalam album terpisah
+/pandawa.ultimate Build an app that helps me organize my photos into separate albums
 ```
 
-Command tunggal ini membawa Anda melalui semua fase build (constitution, specify, clarify, plan, tasks, analyze, implement), berhenti setelah masing-masing untuk konfirmasi Anda sebelum melanjutkan. Fase opsional (clarify, analyze) bisa di-skip di gate-nya. Command operations (`/pandawa.deploy`, `/pandawa.operate`, `/pandawa.postmortem`) tidak termasuk dalam orkestrasi ini — jalankan sendiri di sesi terpisah saat Anda siap rilis.
+This single command takes you through all build phases (constitution, specify, clarify, plan, tasks, analyze, implement), pausing after each for your confirmation before continuing. Optional phases (clarify, analyze) can be skipped at their gates. Operations commands (`/pandawa.deploy`, `/pandawa.operate`, `/pandawa.postmortem`) are not part of this orchestration — run them separately in a later session when you're ready to release.
 
-Jika Anda menjalankan `/pandawa.ultimate` lagi di project yang sudah punya beberapa artefak (mis. spec sudah ada tapi plan belum), ia akan memindai apa yang ada di disk lebih dulu dan menawarkan untuk **(A)** mulai fitur baru, **(B)** melanjutkan dari fase setelah artefak terakhir yang selesai, atau **(C)** restart penuh fitur saat ini. Berhenti di gate mana pun akan mencetak ringkasan abort dengan command manual yang tepat untuk dilanjutkan nanti — tidak ada yang hilang jika Anda berhenti di tengah jalan.
+If you run `/pandawa.ultimate` again in a project that already has some artifacts (e.g., spec exists but plan doesn't), it will scan what exists on disk first and offer to **(A)** start a new feature, **(B)** continue from the phase after the last completed artifact, or **(C)** fully restart the current feature. Stopping at any gate prints an abort summary with the exact manual commands to resume later — nothing is lost if you stop mid-way.
 
-#### Command untuk Project yang Sudah Ada
+#### Brownfield Command
 
-Untuk project brownfield (`pandawa init --here` pada codebase yang sudah ada), jalankan ini dulu supaya sisa workflow punya konteks nyata alih-alih mulai dari spec kosong:
+For brownfield projects (`pandawa init --here` on an existing codebase), run this first so the remaining workflow has real context instead of starting from an empty spec:
 
-| Command | Deskripsi |
+| Command | Description |
 | --- | --- |
-| `/pandawa.brd` | Reverse-engineer Business Requirements Document dari codebase yang sudah ada — menjadi konteks latar belakang untuk `/pandawa.specify` dan `/pandawa.constitution` di project tersebut |
+| `/pandawa.brd` | Reverse-engineer Business Requirements Document from existing codebase — becomes background context for `/pandawa.specify` and `/pandawa.constitution` |
 
 ```bash
 /pandawa.brd
 ```
 
-#### Command Inti
+#### Core Commands
 
-Command esensial untuk workflow Spec-Driven Development (juga bisa dijalankan satu per satu):
+Essential commands for Spec-Driven Development (also runnable one by one):
 
-| Command               | Deskripsi                                                              |
+| Command               | Description                                                              |
 | --------------------- | ------------------------------------------------------------------------ |
-| `/pandawa.constitution` | Buat atau perbarui prinsip pengaturan project dan pedoman pengembangan |
-| `/pandawa.specify`      | Definisikan apa yang ingin Anda bangun (requirement dan user story)            |
-| `/pandawa.plan`         | Buat technical implementation plan dengan tech stack pilihan Anda        |
-| `/pandawa.tasks`        | Generate daftar task yang actionable untuk implementasi             |
-| `/pandawa.implement`    | Eksekusi semua task untuk membangun fitur sesuai plan             |
+| `/pandawa.constitution` | Create or update project governing principles and development guidelines |
+| `/pandawa.specify`      | Define what you want to build (requirements and user stories)            |
+| `/pandawa.plan`         | Create technical implementation plan with your chosen tech stack        |
+| `/pandawa.tasks`        | Generate actionable task list for implementation             |
+| `/pandawa.implement`    | Execute all tasks to build the feature per plan             |
 
-#### Command Opsional
+#### Optional Commands
 
-Command tambahan untuk kualitas dan validasi yang lebih baik:
+Additional commands for better quality and validation:
 
-| Command            | Deskripsi                                                                                                                          |
+| Command            | Description                                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `/pandawa.clarify`   | Klarifikasi area yang underspecified (disarankan sebelum `/pandawa.plan`; dulunya `/quizme`)                                                  |
-| `/pandawa.analyze`   | Analisis konsistensi & coverage lintas-artefak (jalankan setelah `/pandawa.tasks`, sebelum `/pandawa.implement`)                                 |
-| `/pandawa.checklist` | Generate checklist kualitas custom yang memvalidasi kelengkapan, kejelasan, dan konsistensi requirement (seperti "unit test untuk Bahasa Indonesia") |
-| `/pandawa.test`      | Generate unit test yang belum ada, jalankan pengecekan kualitas kode gaya SonarQube (code smell, duplikasi, kompleksitas, keamanan), dan deteksi bug fungsional — membuktikan tiap bug dengan failing test dan melaporkan Bug Report bila ditemukan |
-| `/pandawa.redesign`  | Rework satu bagian dari fitur yang sudah terimplementasi secara incremental (form, page, endpoint, atau table) — edit yang terlingkupi dengan checkpoint & rollback, alih-alih generate ulang dari nol |
-| `/pandawa.taskstoissues` | Buat GitHub issue dari `tasks.md` lewat GitHub MCP server. Hanya jalan jika `git remote` project adalah URL GitHub — skip ini untuk project yang dihosting di GitLab |
+| `/pandawa.clarify`   | Clarify underspecified areas (recommended before `/pandawa.plan`; formerly `/quizme`)                                                  |
+| `/pandawa.analyze`   | Cross-artifact consistency & coverage analysis (run after `/pandawa.tasks`, before `/pandawa.implement`)                                 |
+| `/pandawa.checklist` | Generate custom quality checklist that validates completeness, clarity, and consistency of requirements (e.g., "unit test for Bahasa Indonesia") |
+| `/pandawa.test`      | Generate missing unit tests, run SonarQube-style code quality checks (code smell, duplication, complexity, security), and detect functional bugs — proving each bug with a failing test and reporting a Bug Report when found |
+| `/pandawa.redesign`  | Incrementally rework a part of an already-implemented feature (form, page, endpoint, or table) — scoped edit with checkpoint & rollback, instead of regenerating from scratch |
+| `/pandawa.taskstoissues` | Create GitHub issues from `tasks.md` via GitHub MCP server. Only runs if `git remote` is a GitHub URL — skips for GitLab-hosted projects |
 
-#### Command Operations (pasca-implementasi)
+#### Operations Commands (post-implementation)
 
-Setelah fitur terimplementasi, command ini meneruskan lifecycle ke arah rilis dan operasional — biasanya dijalankan di sesi terpisah saat Anda siap ship:
+After a feature is implemented, these commands carry the lifecycle toward release and operations — usually run in a separate session when you're ready to ship:
 
-| Command | Deskripsi |
+| Command | Description |
 | ------- | ----------- |
-| `/pandawa.deploy` | Siapkan otomasi deployment — containerization, pipeline CI/CD, dan config environment — mengikuti Plan-Verify-Generate. Tidak pernah melakukan deploy live tanpa konfirmasi eksplisit; secara default berhenti di artefak yang tervalidasi + dry-run |
-| `/pandawa.operate` | Wire observability (log/metric/trace/health), analisis telemetry untuk mendeteksi anomali, dan bantu investigasi + penyelesaian insiden produksi (memakai disiplin scoped-edit `/pandawa.redesign`) |
-| `/pandawa.postmortem` | Tutup loop feedback SDD — ubah insiden/telemetry/pembelajaran produksi menjadi update spec, NFR, dan constitution supaya perbaikan bertahan di regenerasi berikutnya. Tidak menyentuh kode aplikasi |
+| `/pandawa.deploy` | Prepare deployment automation — containerization, CI/CD pipeline, and environment config — following Plan-Verify-Generate. Never performs a live deploy without explicit confirmation; by default stops at validated artifacts + dry-run |
+| `/pandawa.operate` | Wire observability (logs/metrics/traces/health), analyze telemetry to detect anomalies, and help investigate + resolve production incidents (using `/pandawa.redesign`'s scoped-edit discipline) |
+| `/pandawa.postmortem` | Close the SDD feedback loop — turn production incidents/telemetry/learnings into spec, NFR, and constitution updates so fixes survive the next regeneration. Does not touch application code |
 
-### Variabel Environment
+### Environment Variables
 
-| Variabel | Deskripsi |
+| Variable | Description |
 | -------- | ----------- |
-| `PANDAWA_FEATURE` | Override deteksi fitur untuk repository non-Git. Set ke nama direktori fitur (mis., `001-photo-albums`) untuk mengerjakan fitur tertentu saat tidak memakai Git branch.<br/>**Harus di-set dalam konteks agen yang Anda pakai sebelum memakai `/pandawa.plan` atau command lanjutannya.** |
+| `PANDAWA_FEATURE` | Override feature detection for non-Git repos. Set to a feature directory name (e.g., `001-photo-albums`) to work on a specific feature when not using Git branches.<br/>**Must be set in your agent's context before using `/pandawa.plan` or later commands.** |
 
-## 📚 Filosofi Inti
+## 📚 Core Philosophy
 
-Spec-Driven Development adalah proses terstruktur yang menekankan:
+Spec-Driven Development is a structured process that emphasizes:
 
-- **Pengembangan berbasis intent** di mana spesifikasi mendefinisikan "*apa*" sebelum "*bagaimana*"
-- **Pembuatan spesifikasi yang kaya** memakai guardrail dan prinsip organisasi
-- **Refinement multi-langkah** alih-alih generasi kode sekali-jadi dari prompt
-- **Bergantung besar** pada kemampuan model AI tingkat lanjut untuk interpretasi spesifikasi
+- **Intent-based development** where specs define "*what*" before "*how*"
+- **Rich spec creation** using guardrails and organizational principles
+- **Multi-step refinement** instead of one-shot code generation from prompt
+- **Heavy reliance** on advanced AI model capabilities for spec interpretation
 
-## 🌟 Fase Pengembangan
+## 🌟 Development Phases
 
-| Fase                                    | Fokus                    | Aktivitas Utama                                                                                                                                                     |
+| Phase                                    | Focus                    | Main Activities                                                                                                                                                     |
 | ---------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Pengembangan 0-ke-1** ("Greenfield")    | Generate dari nol    | <ul><li>Mulai dari requirement level tinggi</li><li>Generate spesifikasi</li><li>Rencanakan langkah implementasi</li><li>Bangun aplikasi yang siap produksi</li></ul> |
-| **Eksplorasi Kreatif**                 | Implementasi paralel | <ul><li>Eksplorasi solusi yang beragam</li><li>Dukung berbagai tech stack & arsitektur</li><li>Eksperimen dengan pattern UX</li></ul>                         |
-| **Peningkatan Iteratif** ("Brownfield") | Modernisasi brownfield | <ul><li>Tambah fitur secara iteratif</li><li>Modernisasi sistem legacy</li><li>Adaptasi proses</li></ul>                                                                |
+| **Greenfield Development** ("Greenfield")    | Generate from scratch    | <ul><li>Start from high-level requirements</li><li>Generate specifications</li><li>Plan implementation steps</li><li>Build production-ready app</li></ul> |
+| **Creative Exploration**                 | Parallel implementation | <ul><li>Explore diverse solutions</li><li>Support various tech stacks & architectures</li><li>Experiment with UX patterns</li></ul>                         |
+| **Iterative Enhancement** ("Brownfield") | Brownfield modernization | <ul><li>Add features iteratively</li><li>Modernize legacy systems</li><li>Adapt processes</li></ul>                                                                |
 
-## 🎯 Tujuan Eksperimental
+## 🎯 Experimental Goals
 
-Riset dan eksperimen kami berfokus pada:
+Our research and experiments focus on:
 
-### Kemandirian teknologi
+### Technology independence
 
-- Membuat aplikasi memakai tech stack yang beragam
-- Memvalidasi hipotesis bahwa Spec-Driven Development adalah sebuah proses, bukan terikat pada teknologi, bahasa programming, atau framework tertentu
+- Build apps using diverse tech stacks
+- Validate the hypothesis that Spec-Driven Development is a process, not tied to a specific technology, programming language, or framework
 
-### Batasan enterprise
+### Enterprise constraints
 
-- Mendemonstrasikan pengembangan aplikasi mission-critical
-- Menggabungkan batasan organisasi (cloud provider, tech stack, praktik engineering)
-- Mendukung design system enterprise dan requirement compliance
+- Demonstrate mission-critical application development
+- Incorporate organizational constraints (cloud provider, tech stack, engineering practices)
+- Support enterprise design systems and compliance requirements
 
-### Pengembangan yang berpusat pada user
+### User-centric development
 
-- Membangun aplikasi untuk kohor dan preferensi user yang berbeda
-- Mendukung berbagai pendekatan pengembangan (dari vibe-coding sampai AI-native development)
+- Build apps for different user cohorts and preferences
+- Support various development approaches (from vibe-coding to AI-native development)
 
-### Proses kreatif & iteratif
+### Creative & iterative process
 
-- Memvalidasi konsep eksplorasi implementasi paralel
-- Menyediakan workflow pengembangan fitur iteratif yang robust
-- Memperluas proses untuk menangani upgrade dan modernisasi
+- Validate the concept of parallel implementation exploration
+- Provide a robust iterative feature development workflow
+- Extend the process to handle upgrades and modernization
 
-## 🔧 Prasyarat
+## 🔧 Prerequisites
 
 - **Linux/macOS/Windows**
-- Agen coding AI yang [didukung](#-agen-ai-yang-didukung).
-- [uv](https://docs.astral.sh/uv/) untuk manajemen package
+- A [supported AI coding agent](#-supported-ai-agents).
+- [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
 
-Jika Anda mengalami masalah dengan sebuah agen, silakan buka issue supaya kami bisa memperbaiki integrasinya.
+If you encounter an issue with an agent, please open an issue so we can fix the integration.
 
-## 📖 Pelajari Lebih Lanjut
+## 📖 Learn More
 
-- **[Metodologi Spec-Driven Development Lengkap](./spec-driven.md)** - Pendalaman proses secara menyeluruh
-- **[Walkthrough Detail](#-proses-detail)** - Panduan implementasi langkah-demi-langkah
+- **[Complete Spec-Driven Development Methodology](./spec-driven.md)** - In-depth process deep dive
+- **[Detailed Walkthrough](#-detailed-process)** - Step-by-step implementation guide
 
 ---
 
-## 📋 Proses Detail
+## 📋 Detailed Process
 
 <details>
-<summary>Klik untuk membuka walkthrough langkah-demi-langkah secara detail</summary>
+<summary>Click to expand detailed step-by-step walkthrough</summary>
 
-Anda bisa memakai CLI Pandawa untuk bootstrap project Anda, yang akan membawa masuk artefak yang dibutuhkan ke environment Anda. Jalankan:
+You can use the Pandawa CLI to bootstrap your project, which will bring the required artifacts into your environment. Run:
 
 ```bash
-pandawa init <nama_project>
+pandawa init <project_name>
 ```
 
-Atau inisialisasi di direktori saat ini:
+Or initialize in the current directory:
 
 ```bash
 pandawa init .
-# atau pakai flag --here
+# or use --here flag
 pandawa init --here
-# Skip konfirmasi saat direktori sudah punya file
+# Skip confirmation when directory already has files
 pandawa init . --force
-# atau
+# or
 pandawa init --here --force
 ```
 
-![Specify CLI bootstrapping a new project in the terminal](./media/pandawa_cli.gif)
+![Pandawa CLI bootstrapping a new project](./media/pandawa_cli.gif)
 
-Anda akan diminta memilih agen AI yang Anda pakai. Anda juga bisa langsung menyebutkannya di terminal:
+You will be prompted to choose your AI assistant. You can also specify it directly:
 
 ```bash
-pandawa init <nama_project> --ai claude
-pandawa init <nama_project> --ai gemini
-pandawa init <nama_project> --ai copilot
+pandawa init <project_name> --ai claude
+pandawa init <project_name> --ai gemini
+pandawa init <project_name> --ai copilot
 
-# Atau di direktori saat ini:
+# Or in the current directory:
 pandawa init . --ai claude
 pandawa init . --ai codex
 
-# atau pakai flag --here
+# or use --here flag
 pandawa init --here --ai claude
 pandawa init --here --ai codex
 
-# Paksa merge ke direktori saat ini yang tidak kosong
+# Force merge into a non-empty current directory
 pandawa init . --force --ai claude
 
-# atau
+# or
 pandawa init --here --force --ai claude
 ```
 
-CLI akan mengecek apakah Anda punya Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, Qoder CLI, atau Amazon Q Developer CLI terinstal. Jika tidak, atau Anda lebih memilih mendapatkan template tanpa pengecekan tool yang tepat, pakai `--ignore-agent-tools` dengan command Anda:
+The CLI will check whether you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, Qoder CLI, or Amazon Q Developer CLI installed. If not, or if you prefer to get the template without strict tool checks, use `--ignore-agent-tools` with your command:
 
 ```bash
-pandawa init <nama_project> --ai claude --ignore-agent-tools
+pandawa init <project_name> --ai claude --ignore-agent-tools
 ```
 
-### **LANGKAH 1:** Tetapkan prinsip project
+### **STEP 1:** Establish project principles
 
-Buka folder project dan jalankan agen AI Anda. Dalam contoh kami, kami memakai `claude`.
+Open the project folder and run your AI agent. In our example we use `claude`.
 
-Anda akan tahu semuanya sudah dikonfigurasi dengan benar jika Anda melihat command `/pandawa.constitution`, `/pandawa.specify`, `/pandawa.plan`, `/pandawa.tasks`, dan `/pandawa.implement` tersedia.
+You will know everything is configured correctly if you see the `/pandawa.constitution`, `/pandawa.specify`, `/pandawa.plan`, `/pandawa.tasks`, and `/pandawa.implement` commands available.
 
-Langkah pertama sebaiknya menetapkan prinsip pengaturan project Anda memakai command `/pandawa.constitution`. Ini membantu memastikan pengambilan keputusan yang konsisten di semua fase pengembangan berikutnya:
+The first step should be to establish your project's governing principles using `/pandawa.constitution`. This helps ensure consistent decision-making across all subsequent phases:
 
 ```text
-/pandawa.constitution Buat prinsip yang berfokus pada kualitas kode, standar testing, konsistensi user experience, dan requirement performa. Sertakan governance tentang bagaimana prinsip-prinsip ini harus memandu keputusan teknis dan pilihan implementasi.
+/pandawa.constitution Create principles focused on code quality, testing standards, UX consistency, and performance requirements. Include governance on how these principles should guide technical decisions and implementation choices.
 ```
 
-Langkah ini membuat atau memperbarui file `.pandawa/memory/constitution.md` dengan pedoman fundamental project Anda yang akan dirujuk oleh agen AI selama fase spesifikasi, planning, dan implementasi.
+This step creates or updates the file `.pandawa/memory/constitution.md` with your project's fundamental guidelines that the AI agent will reference during spec, planning, and implementation.
 
-### **LANGKAH 2:** Buat spesifikasi project
+### **STEP 2:** Create project spec
 
-Setelah prinsip project ditetapkan, Anda sekarang bisa membuat spesifikasi fungsional. Gunakan command `/pandawa.specify` lalu berikan requirement konkret untuk project yang ingin Anda kembangkan.
+After project principles are set, you can now create a functional spec. Use `/pandawa.specify` then provide concrete requirements for the project you want to build.
 
 > [!IMPORTANT]
-> Jelaskan sedetail mungkin tentang *apa* yang Anda coba bangun dan *mengapa*. **Jangan fokus ke tech stack pada tahap ini**.
+> Describe in as much detail as possible *what* you are trying to build and *why*. **Don't focus on tech stack at this stage**.
 
-Contoh prompt:
+Example prompt:
 
 ```text
-Kembangkan Taskify, platform produktivitas tim. Aplikasi ini harus memungkinkan user membuat project, menambah anggota
-tim, menugaskan task, berkomentar dan memindahkan task antar board dengan gaya Kanban. Di fase awal untuk fitur ini,
-kita sebut "Create Taskify", kita akan punya banyak user tapi user-nya akan dideklarasikan lebih dulu, sudah ditentukan.
-Saya ingin lima user dalam dua kategori berbeda, satu product manager dan empat engineer. Buat tiga project sample
-yang berbeda. Kita pakai kolom Kanban standar untuk status setiap task, seperti "To Do,"
-"In Progress," "In Review," dan "Done." Tidak akan ada login untuk aplikasi ini karena ini baru pengujian awal
-untuk memastikan fitur dasar kita sudah siap. Untuk setiap task di UI, di kartu task,
-Anda harus bisa mengubah status task saat ini antar kolom di board Kanban. Anda harus bisa
-meninggalkan komentar tanpa batas untuk sebuah kartu tertentu. Anda harus bisa, dari kartu task
-itu, menugaskan salah satu user yang valid. Saat pertama kali membuka Taskify, akan muncul daftar lima user untuk dipilih.
-Tidak akan ada password yang dibutuhkan. Saat Anda klik seorang user, Anda masuk ke tampilan utama, yang menampilkan daftar
-project. Saat Anda klik sebuah project, Anda membuka board Kanban untuk project tersebut. Anda akan melihat kolom-kolomnya.
-Anda bisa drag-and-drop kartu bolak-balik antar kolom yang berbeda. Anda akan melihat kartu apa pun yang
-ditugaskan ke Anda, user yang sedang login saat ini, dengan warna berbeda dari yang lain, agar Anda bisa cepat
-melihat milik Anda. Anda bisa mengedit komentar yang Anda buat sendiri, tapi tidak bisa mengedit komentar orang lain. Anda bisa
-menghapus komentar yang Anda buat sendiri, tapi tidak bisa menghapus komentar milik orang lain.
+Develop Taskify, a team productivity platform. This app should allow users to create projects, add team
+members, assign tasks, comment and move tasks across boards in a Kanban style. For the initial phase of this feature,
+we call it "Create Taskify", we will have many users but users will be declared upfront, pre-defined.
+I want five users in two different categories, one product manager and four engineers. Create three different sample
+projects. We use standard Kanban columns for each task's status, such as "To Do,"
+"In Progress," "In Review," and "Done." There will be no login for this app as it is an early test
+to make sure our basic features are ready. For each task in the UI, on the task card,
+you should be able to change the task's current status across columns on the Kanban board. You should be able
+to leave unlimited comments for a given card. You should be able, from that task card
+itself, to assign any valid user. When you first open Taskify, a list of five users to choose from will appear.
+No password is required. When you click a user, you enter the main view, which shows the list of
+projects. When you click a project, you open the Kanban board for that project. You will see its columns.
+You can drag-and-drop cards back and forth between different columns. You will see any card that
+is assigned to you, the currently logged-in user, in a different color from the others, so you can quickly
+see yours. You can edit your own comments but not others'. You can
+delete your own comments but not others'.
 ```
 
-Setelah prompt ini dimasukkan, Anda akan melihat Claude Code memulai proses planning dan penyusunan spec. Claude Code juga akan memicu beberapa script built-in untuk menyiapkan repository.
+After submitting this prompt, you will see Claude Code start the planning and spec drafting process. It will also trigger several built-in scripts to prepare the repository.
 
-Setelah langkah ini selesai, Anda seharusnya sudah punya branch baru (mis., `001-create-taskify`), plus spesifikasi baru di direktori `specs/001-create-taskify`.
+After this step completes, you should have a new branch (e.g., `001-create-taskify`), plus a new spec in `specs/001-create-taskify`.
 
-Spesifikasi yang dihasilkan sebaiknya berisi kumpulan user story dan functional requirement, sesuai yang didefinisikan dalam template.
+The generated spec should contain a set of user stories and functional requirements as defined in the template.
 
-Pada tahap ini, isi folder project Anda seharusnya mirip seperti ini:
+At this stage, your project folder should look roughly like:
 
 ```text
 └── .pandawa
@@ -806,46 +791,46 @@ Pada tahap ini, isi folder project Anda seharusnya mirip seperti ini:
         └── tasks-template.md
 ```
 
-### **LANGKAH 3:** Klarifikasi spesifikasi fungsional (wajib sebelum planning)
+### **STEP 3:** Clarify functional spec (required before planning)
 
-Dengan spesifikasi dasar sudah dibuat, Anda bisa lanjut mengklarifikasi requirement mana pun yang belum tertangkap dengan tepat pada percobaan pertama.
+With the base spec in place, you can now clarify any requirements that weren't captured correctly on the first try.
 
-Anda sebaiknya menjalankan workflow klarifikasi terstruktur **sebelum** membuat technical plan untuk mengurangi rework di kemudian hari.
+You should run a structured clarification workflow **before** creating the technical plan to reduce rework later.
 
-Urutan yang disarankan:
+Recommended order:
 
-1. Gunakan `/pandawa.clarify` (terstruktur) – pertanyaan sekuensial berbasis coverage yang mencatat jawaban di section Clarifications.
-2. Opsional: lanjutkan dengan refinement ad-hoc bebas jika masih ada yang terasa kurang jelas.
+1. Use `/pandawa.clarify` (structured) — sequential coverage-based questions that record answers in the Clarifications section.
+2. Optional: follow up with free-form ad-hoc refinement if anything still feels unclear.
 
-Jika Anda sengaja ingin skip klarifikasi (mis., spike atau prototipe eksploratif), sebutkan itu secara eksplisit supaya agen tidak terhenti karena klarifikasi yang belum ada.
+If you intentionally want to skip clarification (e.g., spike or exploratory prototype), say so explicitly so the agent doesn't block on missing clarification.
 
-Contoh prompt refinement bebas (setelah `/pandawa.clarify` jika masih dibutuhkan):
-
-```text
-Untuk setiap project sample atau project yang Anda buat harus ada jumlah task yang bervariasi antara 5 sampai 15
-task untuk masing-masing, terdistribusi secara acak ke berbagai status penyelesaian. Pastikan ada
-minimal satu task di setiap tahap penyelesaian.
-```
-
-Anda juga sebaiknya meminta Claude Code memvalidasi **Review & Acceptance Checklist**, mencentang hal-hal yang sudah divalidasi/lolos requirement, dan membiarkan yang belum tetap tidak tercentang. Prompt berikut bisa dipakai:
+Example free-form refinement prompt (after `/pandawa.clarify` if still needed):
 
 ```text
-Baca review and acceptance checklist, dan centang setiap item di checklist jika feature spec memenuhi kriterianya. Biarkan kosong jika tidak.
+For each sample project or project you create there should be a variable number of tasks between 5 and 15
+tasks for each, distributed randomly across various completion states. Make sure there is
+at least one task in every completion stage.
 ```
 
-Penting untuk memanfaatkan interaksi dengan Claude Code sebagai kesempatan untuk mengklarifikasi dan mengajukan pertanyaan seputar spesifikasi - **jangan anggap percobaan pertamanya sebagai final**.
-
-### **LANGKAH 4:** Generate plan
-
-Anda sekarang bisa spesifik tentang tech stack dan requirement teknis lainnya. Anda bisa memakai command `/pandawa.plan` yang sudah built-in di template project dengan prompt seperti ini:
+You should also ask Claude Code to validate the **Review & Acceptance Checklist**, checking items that are validated / meet requirements and leaving the rest unchecked. You can use this prompt:
 
 ```text
-Kita akan generate ini memakai .NET Aspire, dengan Postgres sebagai database. Frontend-nya harus memakai
-Blazor server dengan drag-and-drop task board, real-time update. Harus ada REST API yang dibuat dengan projects API,
-tasks API, dan notifications API.
+Read the review and acceptance checklist and check each item if the feature spec meets its criteria. Leave empty otherwise.
 ```
 
-Output dari langkah ini akan mencakup sejumlah dokumen detail implementasi, dengan struktur direktori Anda mirip seperti ini:
+It's important to use the interaction with Claude Code as an opportunity to clarify and ask questions about the spec — **don't treat its first attempt as final**.
+
+### **STEP 4:** Generate plan
+
+You can now be specific about tech stack and other technical requirements. You can use the `/pandawa.plan` built into the project template with a prompt like:
+
+```text
+We will generate this using .NET Aspire, with Postgres as database. The frontend should use
+Blazor server with drag-and-drop task board, real-time updates. There should be REST APIs built with projects APIs,
+tasks APIs, and notifications APIs.
+```
+
+The output of this step will include a number of detailed implementation documents, with your directory structure looking roughly like:
 
 ```text
 .
@@ -875,119 +860,72 @@ Output dari langkah ini akan mencakup sejumlah dokumen detail implementasi, deng
     └── tasks-template.md
 ```
 
-Cek dokumen `research.md` untuk memastikan tech stack yang tepat dipakai, sesuai instruksi Anda. Anda bisa meminta Claude Code memperbaikinya jika ada komponen yang terasa aneh, atau bahkan meminta ia mengecek versi platform/framework yang terinstal lokal yang Anda inginkan (mis., .NET).
+Check the `research.md` to ensure the correct tech stack is used per your instructions. You can ask Claude Code to fix it if something looks off, or even ask it to check locally installed platform/framework versions you require (e.g., .NET).
 
-Selain itu, Anda mungkin ingin meminta Claude Code meriset detail tentang tech stack yang dipilih jika itu sesuatu yang berubah cepat (mis., .NET Aspire, framework JS), dengan prompt seperti ini:
+Additionally, you may want to ask Claude Code to research details about the chosen tech stack if it is fast-moving (e.g., .NET Aspire, JS frameworks) with a prompt like:
 
 ```text
-Saya ingin Anda menelusuri implementation plan dan detail implementasi, mencari area yang bisa
-diuntungkan dari riset tambahan karena .NET Aspire adalah library yang cepat berubah. Untuk area yang Anda identifikasi
-membutuhkan riset lebih lanjut, saya ingin Anda memperbarui dokumen riset dengan detail tambahan tentang versi
-spesifik yang akan kita pakai di aplikasi Taskify ini dan menjalankan task riset paralel untuk mengklarifikasi
-detail apa pun memakai riset dari web.
+I want you to look through the implementation plan and implementation details, looking for areas that could
+benefit from additional research because .NET Aspire is a fast-changing library. For any areas you identify
+as needing additional research, I want you to update the research document with additional details about the specific versions
+we will use in this Taskify app and run parallel research tasks to clarify
+any details using web research.
 ```
 
-Selama proses ini, Anda mungkin menemukan Claude Code terjebak meriset hal yang salah - Anda bisa membantu mengarahkannya ke arah yang benar dengan prompt seperti ini:
+During this process you may find Claude Code getting stuck researching the wrong thing — you can steer it with a prompt like:
 
 ```text
-Saya pikir kita perlu memecah ini menjadi serangkaian langkah. Pertama, identifikasi daftar task
-yang Anda perlukan selama implementasi yang Anda belum yakin atau akan diuntungkan
-dari riset lebih lanjut. Tuliskan daftar task-task tersebut. Lalu untuk setiap task ini,
-saya ingin Anda menjalankan task riset terpisah sehingga hasil akhirnya kita
-meriset semua task spesifik tersebut secara paralel. Yang saya lihat Anda lakukan sepertinya Anda
-meriset .NET Aspire secara umum dan saya tidak yakin itu akan berguna banyak untuk kita dalam kasus ini.
-Riset itu terlalu tidak terarah. Riset perlu membantu Anda menyelesaikan pertanyaan spesifik yang tertarget.
+I think we need to break this into a series of steps. First, identify the list of tasks
+you will need during implementation that you are not yet sure about or would benefit
+from additional research. Write down that list of tasks. Then for each of these tasks,
+I want you to run a separate research task so the end result is we
+research all those specific tasks in parallel. What I see you doing seems like you are
+researching .NET Aspire generally and I'm not sure that will be very useful for us in this case.
+That research is too unfocused. The research needs to help you answer specific targeted questions.
 ```
 
 > [!NOTE]
-> Claude Code mungkin terlalu bersemangat dan menambahkan komponen yang tidak Anda minta. Minta ia mengklarifikasi rationale dan sumber dari perubahan tersebut.
+> Claude Code may be overly eager and add components you didn't ask for. Ask it to clarify the rationale and source of those changes.
 
-### **LANGKAH 5:** Minta Claude Code memvalidasi plan
+### **STEP 5:** Validate the plan
 
-Dengan plan sudah ada, Anda sebaiknya meminta Claude Code menelusurinya untuk memastikan tidak ada bagian yang terlewat. Anda bisa memakai prompt seperti ini:
+With the plan in place, you should ask Claude Code to walk through it to ensure nothing is missed. You can use a prompt like:
 
 ```text
-Sekarang saya ingin Anda mengaudit implementation plan dan file detail implementasi.
-Baca dengan fokus menentukan apakah ada urutan task yang perlu Anda lakukan yang jelas
-terlihat dari membacanya. Karena saya tidak tahu apakah ini cukup lengkap. Misalnya,
-saat saya lihat core implementation, akan berguna untuk merujuk ke bagian yang tepat di detail
-implementasi tempat ia bisa menemukan informasi saat menelusuri setiap langkah di core implementation atau di refinement.
+Review the plan for any missing or underspecified areas. Flag any assumptions that need confirmation before we proceed to tasks.
 ```
 
-Ini membantu memperbaiki implementation plan dan membantu Anda menghindari potensi blind spot yang terlewat oleh Claude Code di siklus planning-nya. Setelah pass refinement awal selesai, minta Claude Code menelusuri checklist sekali lagi sebelum Anda lanjut ke implementasi.
+### **STEP 6:** Generate tasks
 
-Anda juga bisa meminta Claude Code (jika Anda punya [GitHub CLI](https://docs.github.com/en/github-cli/github-cli) terinstal) untuk membuat pull request dari branch Anda saat ini ke `main` dengan deskripsi lengkap, untuk memastikan upaya ini terlacak dengan baik.
+Use `/pandawa.tasks` to break the plan into small, testable tasks:
 
-> [!NOTE]
-> Sebelum Anda meminta agen mengimplementasikannya, ada baiknya juga meminta Claude Code untuk cross-check detailnya, melihat apakah ada bagian yang over-engineered (ingat - ia bisa terlalu bersemangat). Jika ada komponen atau keputusan yang over-engineered, Anda bisa meminta Claude Code menyelesaikannya. Pastikan Claude Code mengikuti [constitution](base/memory/constitution.md) sebagai bagian fundamental yang harus dipatuhi saat menetapkan plan.
-
-### **LANGKAH 6:** Generate task breakdown dengan /pandawa.tasks
-
-Setelah implementation plan divalidasi, Anda sekarang bisa memecah plan menjadi task spesifik dan actionable yang bisa dieksekusi dalam urutan yang benar. Gunakan command `/pandawa.tasks` untuk secara otomatis menghasilkan task breakdown detail dari implementation plan Anda:
-
-```text
+```bash
 /pandawa.tasks
 ```
 
-Langkah ini membuat file `tasks.md` di direktori spesifikasi fitur Anda yang berisi:
+This will create `tasks.md` with tasks grouped by user story, each referencing the relevant `FR-###` requirement.
 
-- **Task breakdown yang diorganisir per user story** - Setiap user story menjadi fase implementasi terpisah dengan kumpulan task-nya sendiri
-- **Manajemen dependency** - Task diurutkan untuk menghormati dependency antar komponen (mis., model sebelum service, service sebelum endpoint)
-- **Marker eksekusi paralel** - Task yang bisa berjalan paralel ditandai dengan `[P]` untuk mengoptimalkan workflow pengembangan
-- **Spesifikasi file path** - Setiap task mencakup file path yang tepat tempat implementasi harus dilakukan
-- **Struktur test-driven development** - Jika test diminta, task test disertakan dan diurutkan agar ditulis sebelum implementasi
-- **Validasi checkpoint** - Setiap fase user story menyertakan checkpoint untuk memvalidasi fungsionalitas independen
+### **STEP 7:** Implement
 
-File tasks.md yang dihasilkan menyediakan roadmap yang jelas untuk command `/pandawa.implement`, memastikan implementasi sistematis yang mempertahankan kualitas kode dan memungkinkan delivery user story secara incremental.
+Run `/pandawa.implement` to execute the tasks. The agent will work through the task list, updating `tasks.md` as it completes each item and running verification (`verify_command`) before marking a task done.
 
-### **LANGKAH 7:** Implementasi
+### **STEP 8:** Verify & Ship
 
-Setelah siap, gunakan command `/pandawa.implement` untuk mengeksekusi implementation plan Anda:
-
-```text
-/pandawa.implement
-```
-
-Command `/pandawa.implement` akan:
-
-- Memvalidasi bahwa semua prerequisite sudah ada (constitution, spec, plan, dan tasks)
-- Mem-parse task breakdown dari `tasks.md`
-- Mengeksekusi task dalam urutan yang benar, menghormati dependency dan marker eksekusi paralel
-- Mengikuti pendekatan TDD yang didefinisikan di task plan Anda
-- Menyediakan update progress dan menangani error dengan tepat
-
-> [!IMPORTANT]
-> Agen AI akan mengeksekusi command CLI lokal (seperti `dotnet`, `npm`, dst) - pastikan Anda punya tool yang dibutuhkan terinstal di mesin Anda.
-
-Setelah implementasi selesai, uji aplikasinya dan selesaikan error runtime apa pun yang mungkin tidak terlihat di log CLI (mis., error console browser). Anda bisa menyalin dan menempelkan error semacam itu kembali ke agen AI Anda untuk diselesaikan.
+Run `/pandawa.analyze` (before implement) for cross-artifact consistency, `/pandawa.test` for test generation + SonarQube-style quality checks, and `/pandawa.deploy` / `/pandawa.operate` when ready to ship.
 
 </details>
 
 ---
 
-## 🔍 Pemecahan Masalah
+## 🔍 Troubleshooting
 
-### Git Credential Manager di Linux
+See [Troubleshooting Guide](./docs/troubleshooting.md) or open an issue.
 
-Jika Anda mengalami masalah dengan autentikasi Git di Linux, Anda bisa menginstal Git Credential Manager:
+## 💬 Support
 
-```bash
-#!/usr/bin/env bash
-set -e
-echo "Downloading Git Credential Manager v2.6.1..."
-wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.6.1/gcm-linux_amd64.2.6.1.deb
-echo "Installing Git Credential Manager..."
-sudo dpkg -i gcm-linux_amd64.2.6.1.deb
-echo "Configuring Git to use GCM..."
-git config --global credential.helper manager
-echo "Cleaning up..."
-rm gcm-linux_amd64.2.6.1.deb
-```
+For support, please check our [Support Guide](./SUPPORT.md) or open an issue on GitHub. For Neuron internal use, the canonical source remains [git.neuron.id/research/pandawa](https://git.neuron.id/research/pandawa).
 
-## 💬 Dukungan
+## 📄 License
 
-Untuk dukungan, silakan buka [GitHub issue](https://github.com/zasbita/pandawa/issues/new). Kami menyambut laporan bug, permintaan fitur, dan pertanyaan seputar pemakaian Spec-Driven Development.
+This project is licensed under the terms of the MIT open source license. Please see the [LICENSE](./LICENSE) file for full terms.
 
-## 📄 Lisensi
-
-Project ini dilisensikan di bawah ketentuan lisensi open source MIT. Silakan lihat file [LICENSE](./LICENSE) untuk ketentuan lengkapnya.
