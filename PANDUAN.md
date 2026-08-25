@@ -1,3 +1,5 @@
+<!-- English: This guide is the Indonesian collaboration guide. For English docs see README.md and docs/ -->
+<!-- English: This guide is the Indonesian collaboration guide. For English docs see README.md and docs/ -->
 # Panduan Instalasi & Penggunaan Pandawa
 
 Panduan praktis memakai **Pandawa** pada project Anda — dioptimalkan untuk alur kerja umum:

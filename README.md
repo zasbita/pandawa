@@ -1,17 +1,17 @@
 <div align="center">
     <img src="./media/logo_large.png" alt="Pandawa Logo" width="200" height="200"/>
     <h1>Pandawa</h1>
-    <h3><em>Bangun software berkualitas tinggi lebih cepat.</em></h3>
+    <h3><em>Build high-quality software faster.</em></h3>
 </div>
 
 <p align="center">
-    <strong>Toolkit open source yang membuat Anda fokus pada skenario produk dan hasil yang bisa diprediksi, bukan vibe coding tiap bagian dari nol.</strong>
+    <strong>Open-source toolkit that helps you focus on product scenarios and predictable outcomes — not vibe-coding everything from scratch.</strong>
 </p>
 
 <p align="center">
-    <a href="https://github.com/zasbita/pandawa/actions"><img src="https://github.com/zasbita/pandawa/badges/main/pipeline.svg" alt="Pipeline"/></a>
-    <a href="https://github.com/zasbita/pandawa/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
-    <a href="https://github.com/zasbita/pandawa"><img src="https://img.shields.io/badge/source-git.neuron.id-orange" alt="Source"/></a>
+    <a href="https://git.neuron.id/research/pandawa/-/pipelines"><img src="https://git.neuron.id/research/pandawa/badges/main/pipeline.svg" alt="Pipeline"/></a>
+    <a href="https://git.neuron.id/research/pandawa/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
+    <a href="https://git.neuron.id/research/pandawa"><img src="https://img.shields.io/badge/source-git.neuron.id-orange" alt="Source"/></a>
 </p>
 
 ---
