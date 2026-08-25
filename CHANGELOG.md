@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-08-25
+
+### Changed
+
+- **GitHub-first (Opsi 2 - full migrate)**: `pandawa init` template download now fetches from `github.com/zasbita/pandawa` Releases via `api.github.com/repos/zasbita/pandawa/releases/latest` (public, no `GL_TOKEN` needed). Falls back to `git.neuron.id` only if GitHub fails, preserving internal compatibility. Added `download_template_from_github()` and GitHub-aware version check (`pandawa --version` / status).
+- **Marketplace dual-host**: `_marketplace_raw_file_url()` now emits `raw.githubusercontent.com` for `github.com` URLs and `api/v4` for GitLab; `fetch_marketplace_plugins()` tries GitHub first then falls back to `git.neuron.id/research/pandawa-marketplace-tooling`. Profile archive download supports both GitHub full-repo archive and GitLab path-scoped archive with fallback.
+- **Docs**: install instructions migrated to `git+https://github.com/zasbita/pandawa.git` (`uv tool install`, `uvx`) and badges/links updated; GitLab URLs retained as fallback note for internal Neuron network.
+- **Logo system**: pentagon (Pandawa Lima) + rounded P + 5-dot arc with diagonal gradient, plus wordmark/horizontal lockups (`media/logo.svg`, `logo-wordmark.*`, `logo-horizontal.*`, `icon-256`, `favicon`).
+
+## [0.31.0] - 2026-08-25
+
 ### Added (Pandawa layered architecture)
 
 - **Skill registry (`skills/`)**: unified registry with normalized frontmatter

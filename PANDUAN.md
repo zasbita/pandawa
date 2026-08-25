@@ -49,7 +49,7 @@ available (di marketplace) ──install──▶ installed (lokal) ──use/en
 ## 3. Pasang CLI Pandawa (sekali per mesin)
 
 ```bash
-uv tool install pandawa-cli --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --from git+https://github.com/zasbita/pandawa.git
 pandawa check        # verifikasi tooling
 pandawa version
 ```

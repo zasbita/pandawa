@@ -7,7 +7,7 @@
 ## Prerequisites
 
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
-- A [supported AI coding agent](https://git.neuron.id/research/pandawa/blob/main/README.md#-supported-ai-agents) — e.g. Claude Code, Gemini CLI, GitHub Copilot, Cursor, Codex CLI, and 10+ others
+- A [supported AI coding agent](https://github.com/zasbita/pandawa/blob/main/README.md#-supported-ai-agents) — e.g. Claude Code, Gemini CLI, GitHub Copilot, Cursor, Codex CLI, and 10+ others
 - [uv](https://docs.astral.sh/uv/) for package management
 - [Python 3.11+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
@@ -41,15 +41,15 @@ uv --version
 The easiest way to get started is to initialize a new project:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <PROJECT_NAME>
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <PROJECT_NAME>
 ```
 
 Or initialize in the current directory:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init .
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init .
 # or use the --here flag
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init --here
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init --here
 ```
 
 ### Specify AI Agent
@@ -57,10 +57,10 @@ uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init --here
 You can proactively specify your AI agent during initialization:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --ai claude
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --ai gemini
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --ai copilot
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --ai codebuddy
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --ai claude
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --ai gemini
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --ai copilot
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --ai codebuddy
 ```
 
 ### Specify Script Type (Shell vs PowerShell)
@@ -76,8 +76,8 @@ Auto behavior:
 Force a specific script type:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --script sh
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --script ps
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --script sh
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --script ps
 ```
 
 ### Ignore Agent Tools Check
@@ -85,7 +85,7 @@ uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_
 If you prefer to get the templates without checking for the right tools:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <project_name> --ai claude --ignore-agent-tools
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <project_name> --ai claude --ignore-agent-tools
 ```
 
 ## Verification
@@ -106,7 +106,7 @@ After initialization, you should see the following commands available in your AI
 - `/pandawa.taskstoissues` - Turn `tasks.md` into GitHub issues (GitHub remotes only)
 - `/pandawa.ultimate` - Run the whole lifecycle above in one guided session
 
-See the [Quick Start Guide](quickstart.md) for how these fit together, and the main [README's CLI Reference](https://git.neuron.id/research/pandawa/blob/main/README.md#-pandawa-cli-reference) for every `pandawa` subcommand.
+See the [Quick Start Guide](quickstart.md) for how these fit together, and the main [README's CLI Reference](https://github.com/zasbita/pandawa/blob/main/README.md#-pandawa-cli-reference) for every `pandawa` subcommand.
 
 The `.pandawa/scripts` directory will contain both `.sh` and `.ps1` scripts.
 

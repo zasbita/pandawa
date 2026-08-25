@@ -37,7 +37,7 @@ Install with `pandawa init <project-name> --ai <your-agent>`, then drive the wor
 | — | `/pandawa.test` *(optional)* | Generate missing tests, run quality checks, report bugs |
 | — | `/pandawa.redesign` *(optional)* | Scoped rework of one already-implemented part |
 
-Prefer one command over the whole sequence? `/pandawa.ultimate <your goal>` runs steps 1–7 for you, pausing for confirmation between each phase. See the [Quick Start Guide](quickstart.md) for a full walkthrough, or the [README's CLI Reference](https://git.neuron.id/research/pandawa/blob/main/README.md#-pandawa-cli-reference) for every `pandawa` CLI subcommand (`init`, `profile`, `check`, `usage`, `governance`, `skill`, `run`).
+Prefer one command over the whole sequence? `/pandawa.ultimate <your goal>` runs steps 1–7 for you, pausing for confirmation between each phase. See the [Quick Start Guide](quickstart.md) for a full walkthrough, or the [README's CLI Reference](https://github.com/zasbita/pandawa/blob/main/README.md#-pandawa-cli-reference) for every `pandawa` CLI subcommand (`init`, `profile`, `check`, `usage`, `governance`, `skill`, `run`).
 
 ## Core Philosophy
 
@@ -84,8 +84,8 @@ Our research and experimentation focus on:
 
 ## Contributing
 
-Please see our [Contributing Guide](https://git.neuron.id/research/pandawa/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.
+Please see our [Contributing Guide](https://github.com/zasbita/pandawa/blob/main/CONTRIBUTING.md) for information on how to contribute to this project.
 
 ## Support
 
-For support, please check our [Support Guide](https://git.neuron.id/research/pandawa/blob/main/SUPPORT.md) or open an issue on GitHub.
+For support, please check our [Support Guide](https://github.com/zasbita/pandawa/blob/main/SUPPORT.md) or open an issue on GitHub.

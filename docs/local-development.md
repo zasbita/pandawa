@@ -7,7 +7,7 @@ This guide shows how to iterate on the `pandawa` CLI locally without publishing 
 ## 1. Clone and Switch Branches
 
 ```bash
-git clone https://git.neuron.id/research/pandawa.git
+git clone https://github.com/zasbita/pandawa.git
 cd pandawa
 # Work on a feature branch
 git checkout -b your-feature-branch
@@ -60,7 +60,7 @@ You can also point uvx at a specific branch without merging:
 ```bash
 # Push your working branch first
 git push origin your-feature-branch
-uvx --from git+https://git.neuron.id/research/pandawa.git@your-feature-branch pandawa init demo-branch-test --script ps
+uvx --from git+https://github.com/zasbita/pandawa.git@your-feature-branch pandawa init demo-branch-test --script ps
 ```
 
 ### 4a. Absolute Path uvx (Run From Anywhere)

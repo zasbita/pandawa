@@ -7,10 +7,10 @@
 Pandawa ships two kinds of extension content through a private GitLab marketplace —
 **skill/agent plugins** and **domain profiles**. Both are contributed, reviewed, and
 validated in one dedicated repo, separate from this one: **`pandawa-marketplace-tooling`**
-(`https://git.neuron.id/research/pandawa-marketplace-tooling.git`). This page is the
+(`https://github.com/zasbita/pandawa-marketplace-tooling.git`). This page is the
 one-stop pointer for both *using* and *contributing to* that marketplace — the
-[README](https://git.neuron.id/research/pandawa/blob/main/README.md) and
-[PANDUAN.md](https://git.neuron.id/research/pandawa/blob/main/PANDUAN.md) cover day-to-day
+[README](https://github.com/zasbita/pandawa/blob/main/README.md) and
+[PANDUAN.md](https://github.com/zasbita/pandawa/blob/main/PANDUAN.md) cover day-to-day
 usage in depth already; this page exists so anyone opening this repo also learns the
 marketplace exists and how to add to it.
 
@@ -24,9 +24,9 @@ marketplace exists and how to add to it.
 | Content delivery | Claude Code `git clone`/`pull`s the marketplace repo | `pandawa` fetches the profile's folder live via GitLab's archive API — no clone, no release |
 | Versioning | `version` in `plugin.json`, consumers opt into updates | `version` in `profile.json` too, but **not** a pin — `pandawa init --profile`/`pandawa profile update` always fetch current `main`. A per-project lockfile (`.pandawa/profile-lock.json`) records what's installed, and `pandawa profile status` diffs it against the catalog to surface "update available" |
 
-See the [README's Domain Profiles section](https://git.neuron.id/research/pandawa/blob/main/README.md#domain-profiles)
+See the [README's Domain Profiles section](https://github.com/zasbita/pandawa/blob/main/README.md#domain-profiles)
 for the consumer-facing `pandawa profile`/`pandawa skill`/`pandawa governance` commands, and
-[PANDUAN.md](https://git.neuron.id/research/pandawa/blob/main/PANDUAN.md) for the guided
+[PANDUAN.md](https://github.com/zasbita/pandawa/blob/main/PANDUAN.md) for the guided
 terminal + Claude Code walkthrough.
 
 ## Contributing
@@ -48,11 +48,11 @@ no code change or release needed in **this** repo (`pandawa`) for either. Short 
 testing before opening an MR, and the CODEOWNERS/versioning rules**, is written up
 end-to-end in that repo's own docs — start there rather than duplicating it here:
 
-- [`pandawa-marketplace-tooling/docs/PANDUAN-KOLABORASI.md`](https://git.neuron.id/research/pandawa-marketplace-tooling/blob/main/docs/PANDUAN-KOLABORASI.md) — full start-to-finish collaboration guide (Bahasa Indonesia), including detailed domain-profile rules.
-- [`pandawa-marketplace-tooling/CONTRIBUTING.md`](https://git.neuron.id/research/pandawa-marketplace-tooling/blob/main/CONTRIBUTING.md) — terse technical reference.
-- [`pandawa-marketplace-tooling/README.md`](https://git.neuron.id/research/pandawa-marketplace-tooling/blob/main/README.md) — concepts and consumer usage.
+- [`pandawa-marketplace-tooling/docs/PANDUAN-KOLABORASI.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/docs/PANDUAN-KOLABORASI.md) — full start-to-finish collaboration guide (Bahasa Indonesia), including detailed domain-profile rules.
+- [`pandawa-marketplace-tooling/CONTRIBUTING.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/CONTRIBUTING.md) — terse technical reference.
+- [`pandawa-marketplace-tooling/README.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/README.md) — concepts and consumer usage.
 
 ## See also
 
-- [Roadmap — Phase 3](https://git.neuron.id/research/pandawa/blob/main/docs/roadmap.md) discusses where the marketplace is headed (package catalog, trust/governance layer, compatibility matrix).
+- [Roadmap — Phase 3](https://github.com/zasbita/pandawa/blob/main/docs/roadmap.md) discusses where the marketplace is headed (package catalog, trust/governance layer, compatibility matrix).
 - [Cross-Agent UX Consistency](cross-agent-consistency.md) explains why marketplace plugin delivery is Claude-only today, and the open problem of extending it cross-agent.

@@ -327,11 +327,19 @@ AGENT_CONFIG = {
 
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
+# Pandawa GitHub repository (public) — primary source for templates (opsi 2: full GitHub).
+DEFAULT_GITHUB_REPO = "zasbita/pandawa"
+DEFAULT_GITHUB_API = "https://api.github.com"
+
 # Pandawa private plugin marketplace (skills/agents are distributed via Claude Code
 # /plugin, NOT bundled into the template). PANDAWA only POINTS to the marketplace by
 # writing .claude/settings.json — it never copies plugin content.
+# Note: template host migrated to GitHub (zasbita/pandawa releases), but marketplace
+# still supports both GitHub and GitLab raw URLs (see _marketplace_raw_file_url).
 MARKETPLACE_NAME = "pandawa"
-DEFAULT_MARKETPLACE_URL = "https://git.neuron.id/research/pandawa-marketplace-tooling.git"
+DEFAULT_MARKETPLACE_URL = "https://github.com/zasbita/pandawa-marketplace-tooling.git"
+# Fallback for private GitLab internal installs (env override PANDAWA_MARKETPLACE_URL still works)
+GITLAB_MARKETPLACE_URL = "https://git.neuron.id/research/pandawa-marketplace-tooling.git"
 MARKETPLACE_BASELINE_PLUGINS = ["pandawa-core"]
 
 # Governance plugins are mutually exclusive at runtime: at most ONE may be enabled per
@@ -1474,10 +1482,11 @@ def write_governance_catalog(project_path: Path, names: "list[str]", *, marketpl
     return catalog_path
 
 def _marketplace_raw_file_url(git_url: str, file_path: str = ".claude-plugin/marketplace.json", ref: str = "main") -> "str | None":
-    """Build the GitLab raw-file API URL for a file in the marketplace repo.
+    """Build raw-file URL for marketplace repo (GitHub or GitLab).
 
-    Accepts https (`https://host/group/repo.git`) and scp-style ssh
-    (`git@host:group/repo.git`) URLs. Returns None if it cannot be parsed.
+    Supports GitHub (raw.githubusercontent.com) and GitLab (api/v4). Accepts
+    https (`https://host/group/repo.git`) and scp-style ssh (`git@host:group/repo.git`).
+    Returns None if it cannot be parsed.
     """
     u = (git_url or "").strip()
     if u.endswith(".git"):
@@ -1489,6 +1498,11 @@ def _marketplace_raw_file_url(git_url: str, file_path: str = ".claude-plugin/mar
         host, path = parsed.netloc, parsed.path.lstrip("/")
     if not host or not path:
         return None
+    # GitHub → raw.githubusercontent.com/<owner>/<repo>/<ref>/<file>
+    if "github.com" in host:
+        # path is like zasbita/pandawa-marketplace-tooling → owner/repo
+        return f"https://raw.githubusercontent.com/{path}/{ref}/{file_path}"
+    # GitLab → api/v4
     return f"https://{host}/api/v4/projects/{quote(path, safe='')}/repository/files/{quote(file_path, safe='')}/raw?ref={ref}"
 
 def fetch_marketplace_plugins(url: str, *, cli_token: "str | None" = None,
@@ -1498,28 +1512,45 @@ def fetch_marketplace_plugins(url: str, *, cli_token: "str | None" = None,
 
     `category` defaults to 'skill' when absent. Returns None on any failure (bad URL,
     network, auth, non-200, parse) so callers can fall back to cached/offline data.
+    Tries GitHub first, fallback to GitLab if primary is GitHub and fails.
     """
-    api_url = _marketplace_raw_file_url(url, ref=ref)
-    if not api_url:
-        return None
-    http = client or _get_client()
-    if http is None:
-        return None
-    try:
-        resp = http.get(api_url, timeout=timeout, follow_redirects=True,
-                        headers=_gitlab_auth_headers(cli_token))
-        if resp.status_code != 200:
+    def _fetch_one(u: str):
+        api_url = _marketplace_raw_file_url(u, ref=ref)
+        if not api_url:
             return None
-        data = resp.json()
-    except Exception:
+        http = client or _get_client()
+        if http is None:
+            return None
+        # choose headers by host
+        if "github.com" in (u or "") or "raw.githubusercontent.com" in api_url:
+            gh_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            if gh_token:
+                headers["Authorization"] = f"Bearer {gh_token.strip()}"
+        else:
+            headers = _gitlab_auth_headers(cli_token)
+        try:
+            resp = http.get(api_url, timeout=timeout, follow_redirects=True, headers=headers)
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+        except Exception:
+            return None
+        if not isinstance(data, dict):
+            return None
+        catalog = {}
+        for p in (data.get("plugins") or []):
+            if isinstance(p, dict) and p.get("name"):
+                catalog[p["name"]] = p.get("category") or DEFAULT_PLUGIN_CATEGORY
+        return (data.get("name") or MARKETPLACE_NAME, catalog)
+
+    result = _fetch_one(url)
+    # fallback: if GitHub default fails, try GitLab marketplace (internal)
+    if result is None and url and "github.com" in url and GITLAB_MARKETPLACE_URL and GITLAB_MARKETPLACE_URL != url:
+        result = _fetch_one(GITLAB_MARKETPLACE_URL)
+    if result is None:
         return None
-    if not isinstance(data, dict):
-        return None
-    catalog = {}
-    for p in (data.get("plugins") or []):
-        if isinstance(p, dict) and p.get("name"):
-            catalog[p["name"]] = p.get("category") or DEFAULT_PLUGIN_CATEGORY
-    return (data.get("name") or MARKETPLACE_NAME, catalog)
+    return result
 
 def fetch_marketplace_governance(url: str, *, cli_token: "str | None" = None,
                                  client: "httpx.Client | None" = None, ref: str = "main",
@@ -1889,6 +1920,81 @@ def download_template_from_gitlab(ai_assistant: str, download_dir: Path, *, scri
     }
     return zip_path, metadata
 
+def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_repo: str = None) -> Tuple[Path, dict]:
+    """Download template zip from GitHub Releases (public, no token).
+
+    Fetches latest release from api.github.com/repos/<repo>/releases/latest,
+    picks asset matching pandawa-template-{ai}-{script}.zip.
+    """
+    repo = github_repo or os.getenv("PANDAWA_GITHUB_REPO") or DEFAULT_GITHUB_REPO
+    if client is None:
+        client = _get_client()
+    if verbose:
+        console.print(f"[cyan]Fetching latest release from GitHub ({repo})...[/cyan]")
+    api_url = f"https://api.github.com/repos/{repo}/releases/latest"
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    # GitHub public repo needs no auth; optionally use GITHUB_TOKEN if set
+    gh_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if gh_token:
+        headers["Authorization"] = f"Bearer {gh_token.strip()}"
+    response = client.get(api_url, timeout=30, follow_redirects=True, headers=headers)
+    status = response.status_code
+    if status != 200:
+        error_msg = _format_rate_limit_error(status, response.headers, api_url)
+        if debug:
+            error_msg += f"\n\n[dim]Response body (truncated 500):[/dim]\n{response.text[:500]}"
+        raise RuntimeError(error_msg)
+    try:
+        release_data = response.json()
+    except ValueError as je:
+        raise RuntimeError(f"Failed to parse release JSON: {je}\nRaw (truncated 400): {response.text[:400]}")
+    assets = release_data.get("assets", [])
+    pattern = f"pandawa-template-{ai_assistant}-{script_type}"
+    matching = [a for a in assets if pattern in a.get("name","") and a["name"].endswith(".zip")]
+    asset = matching[0] if matching else None
+    if asset is None:
+        names = "\n".join(a.get('name','?') for a in assets) or "(no assets)"
+        raise RuntimeError(f"No matching release asset found for '{ai_assistant}' (pattern: '{pattern}')\n\nAvailable assets:\n{names}")
+    download_url = asset.get("browser_download_url") or asset.get("url")
+    filename = asset.get("name")
+    file_size = asset.get("size", 0)
+    if verbose:
+        console.print(f"[cyan]Found template:[/cyan] {filename}")
+        if file_size:
+            console.print(f"[cyan]Size:[/cyan] {file_size:,} bytes")
+        console.print(f"[cyan]Release:[/cyan] {release_data.get('tag_name','?')}")
+        console.print(f"[cyan]Downloading template...[/cyan]")
+    zip_path = download_dir / filename
+    # GitHub browser_download_url redirects, no special headers needed
+    dl_headers = {}
+    if gh_token and "api.github.com" in download_url:
+        dl_headers["Authorization"] = f"Bearer {gh_token.strip()}"
+    with client.stream("GET", download_url, timeout=60, follow_redirects=True, headers=dl_headers) as dl_response:
+        if dl_response.status_code != 200:
+            error_msg = _format_rate_limit_error(dl_response.status_code, dl_response.headers, download_url)
+            if debug:
+                error_msg += f"\n\n[dim]Response body (truncated 400):[/dim]\n{dl_response.text[:400]}"
+            raise RuntimeError(error_msg)
+        total_size = int(dl_response.headers.get('content-length', 0))
+        with open(zip_path, 'wb') as f:
+            if total_size == 0:
+                for chunk in dl_response.iter_bytes(chunk_size=8192):
+                    f.write(chunk)
+            else:
+                if show_progress:
+                    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), TextColumn("[progress.percentage]{task.percentage:>3.0f}%"), console=console) as progress:
+                        task = progress.add_task("Downloading...", total=total_size)
+                        downloaded = 0
+                        for chunk in dl_response.iter_bytes(chunk_size=8192):
+                            f.write(chunk); downloaded += len(chunk); progress.update(task, completed=downloaded)
+                else:
+                    for chunk in dl_response.iter_bytes(chunk_size=8192):
+                        f.write(chunk)
+    if verbose:
+        console.print(f"Downloaded: {filename}")
+    metadata = {"filename": filename, "size": file_size, "release": release_data.get("tag_name",""), "asset_url": download_url}
+    return zip_path, metadata
+
 def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: StepTracker | None = None, client: httpx.Client = None, debug: bool = False, gitlab_token: str = None) -> Path:
     """Download the latest release and extract it to create a new project.
     Returns project_path. Uses tracker if provided (with keys: fetch, download, extract, cleanup)
@@ -1896,9 +2002,11 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
     current_dir = Path.cwd()
 
     if tracker:
-        tracker.start("fetch", "contacting GitLab API")
+        tracker.start("fetch", "contacting GitHub API")
+    # Opsi 2: GitHub primary (public), fallback to GitLab for internal compatibility
+    last_exc = None
     try:
-        zip_path, meta = download_template_from_gitlab(
+        zip_path, meta = download_template_from_github(
             ai_assistant,
             current_dir,
             script_type=script_type,
@@ -1906,19 +2014,39 @@ def download_and_extract_template(project_path: Path, ai_assistant: str, script_
             show_progress=(tracker is None),
             client=client,
             debug=debug,
-            gitlab_token=gitlab_token
         )
         if tracker:
-            tracker.complete("fetch", f"release {meta['release']} ({meta['size']:,} bytes)")
+            tracker.complete("fetch", f"GitHub {meta['release']} ({meta['size']:,} bytes)")
             tracker.add("download", "Download template")
             tracker.complete("download", meta['filename'])
-    except Exception as e:
-        if tracker:
-            tracker.error("fetch", str(e))
-        else:
-            if verbose:
-                console.print(f"[red]Error downloading template:[/red] {e}")
-        raise
+    except Exception as e_gh:
+        last_exc = e_gh
+        # fallback to GitLab (private) if GitHub fails
+        try:
+            if verbose and tracker is None:
+                console.print(f"[yellow]GitHub fetch failed ({e_gh}), trying GitLab fallback...[/yellow]")
+            zip_path, meta = download_template_from_gitlab(
+                ai_assistant,
+                current_dir,
+                script_type=script_type,
+                verbose=verbose and tracker is None,
+                show_progress=(tracker is None),
+                client=client,
+                debug=debug,
+                gitlab_token=gitlab_token
+            )
+            if tracker:
+                tracker.complete("fetch", f"GitLab {meta['release']} ({meta['size']:,} bytes)")
+                tracker.add("download", "Download template")
+                tracker.complete("download", meta['filename'])
+        except Exception as e_gl:
+            if tracker:
+                tracker.error("fetch", f"GitHub: {last_exc} | GitLab: {e_gl}")
+            else:
+                if verbose:
+                    console.print(f"[red]Error downloading template (GitHub):[/red] {last_exc}")
+                    console.print(f"[red]Error downloading template (GitLab):[/red] {e_gl}")
+            raise last_exc from e_gl
 
     if tracker:
         tracker.add("extract", "Extract template")
@@ -2173,6 +2301,46 @@ def _write_profile_lock_entry(project_path: Path, profile_id: str, *, version: "
     path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
 
 
+def download_profile_archive_from_github(profile_path: str, download_dir: Path, *, ref: str = "main",
+                                         verbose: bool = True, show_progress: bool = True,
+                                         client: httpx.Client = None, debug: bool = False,
+                                         github_repo: str = None) -> Tuple[Path, dict]:
+    """Download profile folder from GitHub (public) via full repo archive."""
+    repo = github_repo or os.getenv("PANDAWA_MARKETPLACE_GITHUB_REPO") or "zasbita/pandawa-marketplace-tooling"
+    if client is None:
+        client = _get_client()
+    if verbose:
+        console.print(f"[cyan]Fetching profile from GitHub:[/cyan] {profile_path} @ {ref} ({repo})")
+    download_url = f"https://github.com/{repo}/archive/refs/heads/{ref}.zip"
+    zip_path = download_dir / f"profile-{Path(profile_path).name}-{ref}-github.zip"
+    if verbose:
+        console.print("[cyan]Downloading profile (GitHub)...[/cyan]")
+    headers = {}
+    gh_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if gh_token:
+        headers["Authorization"] = f"Bearer {gh_token.strip()}"
+    with client.stream("GET", download_url, timeout=60, follow_redirects=True, headers=headers) as dl_response:
+        if dl_response.status_code != 200:
+            dl_response.read()
+            error_msg = _format_rate_limit_error(dl_response.status_code, dl_response.headers, download_url)
+            if debug:
+                error_msg += f"\n\n[dim]Response body (truncated 400):[/dim]\n{dl_response.text[:400]}"
+            raise RuntimeError(f"{error_msg}\n\nNo content at '{profile_path}' on ref '{ref}' (GitHub repo {repo}).")
+        total_size = int(dl_response.headers.get("content-length", 0))
+        with open(zip_path, "wb") as f:
+            if total_size == 0 or not show_progress:
+                for chunk in dl_response.iter_bytes(chunk_size=8192):
+                    f.write(chunk)
+            else:
+                with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), TextColumn("[progress.percentage]{task.percentage:>3.0f}%"), console=console) as progress:
+                    task = progress.add_task("Downloading profile...", total=total_size)
+                    downloaded = 0
+                    for chunk in dl_response.iter_bytes(chunk_size=8192):
+                        f.write(chunk); downloaded += len(chunk); progress.update(task, completed=downloaded)
+    if verbose:
+        console.print(f"Downloaded: {zip_path.name} (full repo archive, will extract subpath)")
+    return zip_path, {"path": profile_path, "ref": ref, "size": zip_path.stat().st_size, "github": True}
+
 def download_profile_archive_from_gitlab(profile_path: str, download_dir: Path, *, ref: str = "main",
                                          verbose: bool = True, show_progress: bool = True,
                                          client: httpx.Client = None, debug: bool = False,
@@ -2255,22 +2423,38 @@ def download_and_extract_profile(project_path: Path, profile_id: str, ai_assista
                 "if you're testing a profile that hasn't merged to profiles.json yet."
             )
         if tracker:
-            tracker.start("profile-fetch", "contacting GitLab API")
+            tracker.start("profile-fetch", "contacting GitHub API")
+        last_exc = None
         try:
-            zip_path, meta = download_profile_archive_from_gitlab(
+            zip_path, meta = download_profile_archive_from_github(
                 profile_path, current_dir,
                 verbose=verbose and tracker is None,
                 show_progress=(tracker is None),
-                client=client, debug=debug, gitlab_token=gitlab_token,
+                client=client, debug=debug,
             )
             if tracker:
-                tracker.complete("profile-fetch", f"{meta['path']} @ {meta['ref']} ({meta['size']:,} bytes)")
+                tracker.complete("profile-fetch", f"GitHub {meta['path']} @ {meta['ref']} ({meta['size']:,} bytes)")
                 tracker.add("profile-download", "Download profile")
                 tracker.complete("profile-download", zip_path.name)
-        except Exception as e:
-            if tracker:
-                tracker.error("profile-fetch", str(e))
-            raise
+        except Exception as e_gh:
+            last_exc = e_gh
+            try:
+                if verbose and tracker is None:
+                    console.print(f"[yellow]GitHub profile fetch failed ({e_gh}), trying GitLab...[/yellow]")
+                zip_path, meta = download_profile_archive_from_gitlab(
+                    profile_path, current_dir,
+                    verbose=verbose and tracker is None,
+                    show_progress=(tracker is None),
+                    client=client, debug=debug, gitlab_token=gitlab_token,
+                )
+                if tracker:
+                    tracker.complete("profile-fetch", f"GitLab {meta['path']} @ {meta['ref']} ({meta['size']:,} bytes)")
+                    tracker.add("profile-download", "Download profile")
+                    tracker.complete("profile-download", zip_path.name)
+            except Exception as e_gl:
+                if tracker:
+                    tracker.error("profile-fetch", f"GitHub: {last_exc} | GitLab: {e_gl}")
+                raise last_exc from e_gl
 
     if tracker:
         tracker.add("profile-extract", "Extract profile")
@@ -2640,7 +2824,8 @@ def init(
         _profile_name = profile_config.get(selected_profile, {}).get("name", selected_profile)
         console.print(f"[cyan]Selected profile:[/cyan] {selected_profile} ({_profile_name})")
 
-    gitlab_token = _require_gitlab_token(gitlab_token)
+    # Opsi 2: GitHub primary needs no token; only fetch GitLab token if user explicitly passed one (fallback)
+    gitlab_token = _gitlab_token(gitlab_token)
 
     tracker = StepTracker("Initialize Pandawa Project")
 
@@ -2971,10 +3156,14 @@ def version(
         except Exception:
             pass
     
-    gitlab_token = _require_gitlab_token(gitlab_token)
+    gitlab_token = _gitlab_token(gitlab_token)
 
-    # Fetch latest template release version
-    api_url = "https://git.neuron.id/api/v4/projects/research%2Fpandawa/releases?per_page=1"
+    # Opsi 2: fetch version from GitHub first, fallback GitLab
+    api_url = f"https://api.github.com/repos/{DEFAULT_GITHUB_REPO}/releases/latest"
+    gh_headers = {"Accept": "application/vnd.github.v3+json"}
+    gh_tok = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if gh_tok:
+        gh_headers["Authorization"] = f"Bearer {gh_tok.strip()}"
 
     template_version = "unknown"
     release_date = "unknown"
@@ -2984,24 +3173,48 @@ def version(
             api_url,
             timeout=10,
             follow_redirects=True,
-            headers=_gitlab_auth_headers(gitlab_token),
+            headers=gh_headers,
         )
         if response.status_code == 200:
-            releases = response.json()
-            if releases:
-                release_data = releases[0]
+            data = response.json()
+            # GitHub returns dict, GitLab returns list — handle both
+            if isinstance(data, dict):
+                release_data = data
+            elif isinstance(data, list) and data:
+                release_data = data[0]
+            else:
+                release_data = None
+            if release_data:
                 template_version = release_data.get("tag_name", "unknown")
-                # Remove 'v' prefix if present
                 if template_version.startswith("v"):
                     template_version = template_version[1:]
-                release_date = release_data.get("released_at", "unknown")
+                release_date = release_data.get("released_at") or release_data.get("published_at", "unknown")
                 if release_date != "unknown":
-                    # Format the date nicely
                     try:
                         dt = datetime.fromisoformat(release_date.replace('Z', '+00:00'))
                         release_date = dt.strftime("%Y-%m-%d")
                     except Exception:
                         pass
+        # fallback to GitLab if GitHub failed (e.g., no release yet)
+        if template_version == "unknown":
+            try:
+                gl_api = "https://git.neuron.id/api/v4/projects/research%2Fpandawa/releases?per_page=1"
+                gl_resp = _get_client().get(gl_api, timeout=10, follow_redirects=True, headers=_gitlab_auth_headers(gitlab_token))
+                if gl_resp.status_code == 200:
+                    gl_data = gl_resp.json()
+                    if isinstance(gl_data, list) and gl_data:
+                        rd = gl_data[0]
+                        tv = rd.get("tag_name","unknown")
+                        if tv.startswith("v"): tv=tv[1:]
+                        template_version = tv
+                        rd2 = rd.get("released_at","unknown")
+                        if rd2 != "unknown":
+                            try:
+                                dt = datetime.fromisoformat(rd2.replace('Z','+00:00'))
+                                release_date = dt.strftime("%Y-%m-%d")
+                            except: pass
+            except Exception:
+                pass
     except Exception:
         pass
 

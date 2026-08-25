@@ -8,7 +8,7 @@
 
 | What to Upgrade | Command | When to Use |
 | --------------- | ------- | ----------- |
-| **CLI Tool Only** | `uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pandawa.git` | Get latest CLI features without touching project files |
+| **CLI Tool Only** | `uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git` | Get latest CLI features without touching project files |
 | **Project Files** | `pandawa init --here --force --ai <your-agent>` | Update slash commands, templates, and scripts in your project |
 | **Both** | Run CLI upgrade, then project update | Recommended for major version updates |
 
@@ -21,7 +21,7 @@ The CLI tool (`pandawa`) is separate from your project files. Upgrade it to get 
 ### If you installed with `uv tool install`
 
 ```bash
-uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git
 ```
 
 ### If you use one-shot `uvx` commands
@@ -29,7 +29,7 @@ uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pa
 No upgrade needed—`uvx` always fetches the latest version. Just run your commands as normal:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init --here --ai copilot
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init --here --ai copilot
 ```
 
 ### Verify the upgrade
@@ -74,7 +74,7 @@ Run this inside your project directory:
 pandawa init --here --force --ai <your-agent>
 ```
 
-Replace `<your-agent>` with your AI assistant. Refer to this list of [Supported AI Agents](https://git.neuron.id/research/pandawa/blob/main/README.md#-supported-ai-agents)
+Replace `<your-agent>` with your AI assistant. Refer to this list of [Supported AI Agents](https://github.com/zasbita/pandawa/blob/main/README.md#-supported-ai-agents)
 
 **Example:**
 
@@ -165,7 +165,7 @@ Restart your IDE to refresh the command list.
 
 ```bash
 # Upgrade CLI (if using persistent install)
-uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git
 
 # Update project files to get new commands
 pandawa init --here --force --ai copilot
@@ -182,7 +182,7 @@ cp .pandawa/memory/constitution.md /tmp/constitution-backup.md
 cp -r .pandawa/templates /tmp/templates-backup
 
 # 2. Upgrade CLI
-uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git
 
 # 3. Update project
 pandawa init --here --force --ai copilot
@@ -383,7 +383,7 @@ If not found, reinstall:
 
 ```bash
 uv tool uninstall pandawa-cli
-uv tool install pandawa-cli --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --from git+https://github.com/zasbita/pandawa.git
 ```
 
 ### "Do I need to run pandawa every time I open my project?"
@@ -439,6 +439,6 @@ Pandawa follows semantic versioning for major releases. The CLI and project file
 After upgrading:
 
 - **Test new slash commands:** Run `/pandawa.constitution` or another command to verify everything works
-- **Review release notes:** Check [GitHub Releases](https://git.neuron.id/research/pandawa/releases) for new features and breaking changes
+- **Review release notes:** Check [GitHub Releases](https://github.com/zasbita/pandawa/releases) for new features and breaking changes
 - **Update workflows:** If new commands were added, update your team's development workflows
 - **Check documentation:** Visit [github.io/pandawa](https://github.github.io/pandawa/) for updated guides

@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-    <a href="https://git.neuron.id/research/pandawa/-/pipelines"><img src="https://git.neuron.id/research/pandawa/badges/main/pipeline.svg" alt="Pipeline"/></a>
-    <a href="https://git.neuron.id/research/pandawa/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
-    <a href="https://git.neuron.id/research/pandawa"><img src="https://img.shields.io/badge/source-git.neuron.id-orange" alt="Source"/></a>
+    <a href="https://github.com/zasbita/pandawa/actions"><img src="https://github.com/zasbita/pandawa/badges/main/pipeline.svg" alt="Pipeline"/></a>
+    <a href="https://github.com/zasbita/pandawa/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
+    <a href="https://github.com/zasbita/pandawa"><img src="https://img.shields.io/badge/source-git.neuron.id-orange" alt="Source"/></a>
 </p>
 
 ---
@@ -54,7 +54,7 @@ Pilih metode instalasi yang Anda inginkan:
 Instal sekali, pakai di mana saja:
 
 ```bash
-uv tool install pandawa-cli --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --from git+https://github.com/zasbita/pandawa.git
 ```
 
 Lalu pakai tool-nya langsung:
@@ -75,7 +75,7 @@ pandawa check
 Untuk upgrade Pandawa, lihat [Panduan Upgrade](./docs/upgrade.md) untuk instruksi lengkap. Upgrade cepat:
 
 ```bash
-uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pandawa.git
+uv tool install pandawa-cli --force --from git+https://github.com/zasbita/pandawa.git
 ```
 
 #### Opsi 2: Pemakaian Sekali Pakai
@@ -83,7 +83,7 @@ uv tool install pandawa-cli --force --from git+https://git.neuron.id/research/pa
 Jalankan langsung tanpa instalasi:
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <NAMA_PROJECT>
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <NAMA_PROJECT>
 ```
 
 **Keuntungan instalasi persisten:**
@@ -240,7 +240,7 @@ Jalankan `pandawa profile list` kapan saja untuk melihat kumpulan ID dan nama pr
 
 #### Menambahkan profil baru (self-service)
 
-Profil berada di repo **`pandawa-marketplace-tooling`** (`https://git.neuron.id/research/pandawa-marketplace-tooling.git`), bersebelahan dengan plugin skill/agent, sebagai konsep top-level yang terpisah — satu repo, satu alur kontribusi, satu job validasi CI untuk keduanya. Menambahkan profil sepenuhnya self-service — tanpa perubahan kode CLI, tanpa release CLI, tanpa langkah packaging:
+Profil berada di repo **`pandawa-marketplace-tooling`** (`https://github.com/zasbita/pandawa-marketplace-tooling.git`), bersebelahan dengan plugin skill/agent, sebagai konsep top-level yang terpisah — satu repo, satu alur kontribusi, satu job validasi CI untuk keduanya. Menambahkan profil sepenuhnya self-service — tanpa perubahan kode CLI, tanpa release CLI, tanpa langkah packaging:
 
 1. Di clone `pandawa-marketplace-tooling`, tambahkan folder di `profiles/<profil-anda>/` dengan manifest `profile.json` (`{"id", "name", "description"}`) plus `constitution/`, `architecture/`, `governance/`, `validation/`, `prompts/`, `SKILL.md`, dst milik Anda sendiri — termasuk stack frontend apa pun yang menjadi target profil Anda.
 2. Tambahkan satu entri `{"id": "<id-anda>", "path": "profiles/<profil-anda>"}` ke `profiles.json` di root repo tersebut — ini satu-satunya file bersama yang Anda sentuh, dan memakai pola registrasi satu-baris yang sama seperti `.claude-plugin/marketplace.json`.
@@ -249,7 +249,7 @@ Profil berada di repo **`pandawa-marketplace-tooling`** (`https://git.neuron.id/
 Sebelum merge, uji dulu secara lokal terhadap clone Anda dengan `pandawa init --profile <id-anda> --profile-path <path-ke-clone-anda>/profiles/<profil-anda>` (melewati pengecekan katalog sepenuhnya, karena sumbernya sudah eksplisit).
 
 > [!TIP]
-> Untuk panduan kolaborasi lengkap dari awal sampai akhir (keputusan plugin vs profil, anatomi lengkap folder domain-profile, CODEOWNERS, aturan breaking-change), lihat [`pandawa-marketplace-tooling/docs/PANDUAN-KOLABORASI.md`](https://git.neuron.id/research/pandawa-marketplace-tooling/blob/main/docs/PANDUAN-KOLABORASI.md), atau [dokumen Marketplace](docs/marketplace.md) milik repo ini sendiri.
+> Untuk panduan kolaborasi lengkap dari awal sampai akhir (keputusan plugin vs profil, anatomi lengkap folder domain-profile, CODEOWNERS, aturan breaking-change), lihat [`pandawa-marketplace-tooling/docs/PANDUAN-KOLABORASI.md`](https://github.com/zasbita/pandawa-marketplace-tooling/blob/main/docs/PANDUAN-KOLABORASI.md), atau [dokumen Marketplace](docs/marketplace.md) milik repo ini sendiri.
 
 #### Apa yang diinstal oleh sebuah profil
 
@@ -986,7 +986,7 @@ rm gcm-linux_amd64.2.6.1.deb
 
 ## 💬 Dukungan
 
-Untuk dukungan, silakan buka [GitHub issue](https://git.neuron.id/research/pandawa/issues/new). Kami menyambut laporan bug, permintaan fitur, dan pertanyaan seputar pemakaian Spec-Driven Development.
+Untuk dukungan, silakan buka [GitHub issue](https://github.com/zasbita/pandawa/issues/new). Kami menyambut laporan bug, permintaan fitur, dan pertanyaan seputar pemakaian Spec-Driven Development.
 
 ## 📄 Lisensi
 

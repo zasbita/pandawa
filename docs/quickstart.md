@@ -25,17 +25,17 @@ This guide will help you get started with Spec-Driven Development using Pandawa.
 
 ```bash
 # Create a new project directory
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <PROJECT_NAME>
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <PROJECT_NAME>
 
 # OR initialize in the current directory
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init .
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init .
 ```
 
 Pick script type explicitly (optional):
 
 ```bash
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <PROJECT_NAME> --script sh  # Force POSIX shell
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <PROJECT_NAME> --script ps  # Force PowerShell
+uvx --from git+https://github.com/zasbita/pandawa.git pandawa init <PROJECT_NAME> --script sh  # Force POSIX shell
 ```
 
 > [!TIP]
@@ -44,12 +44,12 @@ uvx --from git+https://git.neuron.id/research/pandawa.git pandawa init <PROJECT_
 <!-- -->
 
 > [!TIP]
-> **Targeting a specific domain (e.g. telecom/TM Forum ODA)?** Pass `--profile <profile-id>` to `pandawa init` (or pick one from the interactive menu) to load domain-specific constitution rules, architecture patterns, and templates alongside the base Pandawa template. See the [Domain Profiles reference](https://git.neuron.id/research/pandawa/blob/main/README.md#domain-profiles) in the main README.
+> **Targeting a specific domain (e.g. telecom/TM Forum ODA)?** Pass `--profile <profile-id>` to `pandawa init` (or pick one from the interactive menu) to load domain-specific constitution rules, architecture patterns, and templates alongside the base Pandawa template. See the [Domain Profiles reference](https://github.com/zasbita/pandawa/blob/main/README.md#domain-profiles) in the main README.
 
 <!-- -->
 
 > [!TIP]
-> **In a hurry?** Instead of running Steps 2–6 one at a time, you can run `/pandawa.ultimate <your goal>` once and it drives the whole lifecycle for you, pausing for your confirmation between each phase. See [Guided Workflow](https://git.neuron.id/research/pandawa/blob/main/README.md#2-run-the-guided-workflow-recommended) in the main README.
+> **In a hurry?** Instead of running Steps 2–6 one at a time, you can run `/pandawa.ultimate <your goal>` once and it drives the whole lifecycle for you, pausing for your confirmation between each phase. See [Guided Workflow](https://github.com/zasbita/pandawa/blob/main/README.md#2-run-the-guided-workflow-recommended) in the main README.
 
 ### Step 2: Define Your Constitution
 
@@ -226,6 +226,6 @@ This only touches the part you named, records the change in `implementation-log.
 
 ## Next Steps
 
-- Read the [complete methodology](https://git.neuron.id/research/pandawa/blob/main/spec-driven.md) for in-depth guidance
-- Check out [more examples](https://git.neuron.id/research/pandawa/tree/main/templates) in the repository
-- Explore the [source code on GitLab](https://git.neuron.id/research/pandawa)
+- Read the [complete methodology](https://github.com/zasbita/pandawa/blob/main/spec-driven.md) for in-depth guidance
+- Check out [more examples](https://github.com/zasbita/pandawa/tree/main/templates) in the repository
+- Explore the [source code on GitLab](https://github.com/zasbita/pandawa)
