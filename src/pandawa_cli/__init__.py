@@ -1710,6 +1710,66 @@ def _auto_migrate_governance_guard(project_path: Path) -> None:
     except Exception:
         pass
 
+def _layers_src() -> Path:
+    """Root holding the bundled skills/ and agents/ layers.
+
+    ponytail: resolved relative to this file (repo/src layout). When installing
+    from a wheel, set PANDAWA_HOME to the checkout root until layers ship as
+    package data.
+    """
+    env = os.getenv("PANDAWA_HOME")
+    if env:
+        return Path(env)
+    return Path(__file__).resolve().parents[2]
+
+# Hosts with a native project-local skill directory; others read from .pandawa/skills.
+_LAYER_SKILL_DIRS = {
+    "claude": ".claude/skills",
+    "opencode": ".opencode/skills",
+}
+
+def install_layers(project_path: Path, selected_ai: str, *, tracker: "StepTracker | None" = None) -> None:
+    """Install the bundled skill registry + role agents into the project.
+
+    Canonical copy goes to .pandawa/{skills,agents}. For hosts with a native
+    skill directory (see _LAYER_SKILL_DIRS), skills are also copied there so the
+    host loads them without extra configuration.
+    """
+    root = _layers_src()
+    skills_src = root / "skills"
+    agents_src = root / "agents"
+    if not (skills_src / "brainstorming" / "SKILL.md").exists():
+        if tracker:
+            tracker.skip("layers", "bundled layers not found")
+        return
+    if tracker:
+        tracker.start("layers")
+
+    dst_skills = project_path / ".pandawa" / "skills"
+    dst_agents = project_path / ".pandawa" / "agents"
+    shutil.copytree(skills_src, dst_skills, dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns("__pycache__"))
+    dst_agents.mkdir(parents=True, exist_ok=True)
+    for agent_md in agents_src.glob("*.md"):
+        shutil.copy2(agent_md, dst_agents / agent_md.name)
+
+    copied = 0
+    native = _LAYER_SKILL_DIRS.get(selected_ai)
+    if native:
+        host_dir = project_path / native
+        for skill_dir in sorted(dst_skills.iterdir()):
+            if (skill_dir / "SKILL.md").is_file():
+                shutil.copytree(skill_dir, host_dir / skill_dir.name, dirs_exist_ok=True)
+                copied += 1
+
+    detail = f"{len(list(dst_skills.iterdir()))} skills, {len(list(dst_agents.glob('*.md')))} agents"
+    if native:
+        detail += f"; {copied} installed to {native}"
+    else:
+        detail += "; no native skill dir — host reads .pandawa/"
+    if tracker:
+        tracker.complete("layers", detail)
+
 def scaffold_project_context(project_path: Path, *, tracker: "StepTracker | None" = None) -> bool:
     """Write a starter CLAUDE.md (project context for agents) if one does not exist.
     Never overwrites an existing CLAUDE.md (safe for existing/legacy projects)."""
@@ -2637,6 +2697,9 @@ def init(
             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, gitlab_token=gitlab_token)
 
             ensure_executable_scripts(project_path, tracker=tracker)
+
+            # Skill registry + role agents (all hosts; native dir for supported ones).
+            install_layers(project_path, selected_ai, tracker=tracker)
 
             # Point the project at the Pandawa plugin marketplace (Claude only).
             if selected_ai == "claude" and not no_marketplace:
