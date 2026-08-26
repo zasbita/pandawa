@@ -234,7 +234,7 @@ Profile folders are fetched live from git (`main`, no CLI release needed) and ex
 | --- | --- | --- |
 | `tmforum-oda` | TM Forum ODA Constitution | Reusable TM Forum Open Digital Architecture constitution framework: API governance, DDD, CQRS, event-driven patterns for BSS/OSS systems |
 | `tmforum-oda-door-v3` | TM Forum ODA Design DOOR v3 | Everything in `tmforum-oda`, plus DOOR v3 design system — NestJS, CQRS, React MFE, Module Federation |
-| `pegadaian` | Pegadaian Support Service Constitution | NestJS backend + Vue 3 Module Federation frontend constitution for Pegadaian AI team services. **Status: Draft** — see Known Gaps in `constitution/00-index.md` before treating as binding |
+| `support-service` | Support Service Constitution | NestJS backend + Vue 3 Module Federation frontend constitution for support service teams. **Status: Draft** — see Known Gaps in `constitution/00-index.md` before treating as binding |
 
 Run `pandawa profile list` anytime to see the current set of known profile IDs and names (this table may change as new profiles are added — the CLI list is the source of truth). Run `pandawa profile refresh` to sync the local catalog with `main` — profiles appear here as soon as they merge, without a CLI release.
 

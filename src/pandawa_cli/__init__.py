@@ -2171,7 +2171,7 @@ def _profile_compliance_reference(profile_prefix: str, profile_dest: "Path | Non
     """Point at whatever compliance-checking artifact this specific profile actually ships.
 
     Profiles are not required to follow the same convention: `tmforum-oda` ships a
-    machine-readable `_oda-compliance-matrix.json`; other profiles (e.g. `pegadaian`)
+    machine-readable `_oda-compliance-matrix.json`; other profiles (e.g. `support-service`)
     document compliance purely through `validation/*.md` rule books instead. Check the
     extracted profile directory rather than assuming one profile's convention is universal.
     """
@@ -2195,7 +2195,7 @@ def _profile_frontend_constitution_ref(profile_prefix: str, profile_dest: "Path 
     """Find whichever constitution file documents frontend standards for this profile.
 
     Domain numbering/naming is profile-specific (tmforum-oda's frontend domain is
-    `04-frontend-engineering.md`; pegadaian's is `05-frontend-engineering.md`) — locate it
+    `04-frontend-engineering.md`; support-service's is `05-frontend-engineering.md`) — locate it
     by pattern instead of hardcoding a filename that only matches one profile.
     """
     if profile_dest is None:
