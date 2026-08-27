@@ -1200,12 +1200,21 @@ def show_banner():
     console.print(Align.center(Text(TAGLINE, style="italic bright_yellow")))
     console.print()
 
+def _version_callback(value: bool):
+    if value:
+        console.print(_pandawa_version_str())
+        raise typer.Exit(0)
+
+
 @app.callback()
-def callback(ctx: typer.Context):
+def callback(
+    ctx: typer.Context,
+    version: bool = typer.Option(None, "--version", "-V", help="Show CLI version and exit", is_eager=True, callback=_version_callback),
+):
     """Launch the interactive TUI when invoked with no subcommand (in a terminal);
     fall back to the banner + hint when not attached to a terminal (CI, pipes, scripts)."""
     _auto_migrate_governance_guard(Path.cwd())
-    if ctx.invoked_subcommand is None and "--help" not in sys.argv and "-h" not in sys.argv:
+    if ctx.invoked_subcommand is None and "--help" not in sys.argv and "-h" not in sys.argv and "--version" not in sys.argv and "-V" not in sys.argv:
         if sys.stdin.isatty() and sys.stdout.isatty():
             from pandawa_cli.tui.app import PandawaTUIApp
             PandawaTUIApp(project_path=Path.cwd()).run()

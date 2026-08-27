@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.1] - 2026-08-27
+
+### Fixed
+
+- **`pandawa --version`**: `No such option: --version` — add global `--version`/`-V` eager flag at app callback (`src/pandawa_cli/__init__.py:1203`) printing `_pandawa_version_str()` and exiting, so `pandawa --version`/`-V` works alongside `pandawa version` subcommand; prevents TUI launch on version flag.
+
 ## [0.36.0] - 2026-08-27
 
 ### Added
