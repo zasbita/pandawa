@@ -29,6 +29,12 @@ description: "Task list template for feature implementation"
 
 > **Pint gate**: If PHP/Laravel, run `pint` (fix) **before** `pint --test` in the phase gate. `pint --test` fails on `new_with_parentheses, fully_qualified_strict_types` after generation — auto-fix first, then test. Split tasks as `Create test + Run pint + Run test` if needed.
 
+> **Task marker automation (PS 5.1 compat)**: Do NOT hand-edit `- [X] T00x [done]` via `head`/`&&` one-liners. After each phase, run `.pandawa/scripts/powershell/update-tasks.ps1 -FromLog` (or `-TaskIds T001,T002 -Status done`) / `scripts/bash/update-tasks.sh --from-log` — parses `implementation-log.md` for `T###` and marks `tasks.md` with `- [X] T00x [done]` (LF without BOM). Pwsh example: `Select-String -Pattern "T\d+"` not `grep | head`.
+
+> **Env sync (Laravel)**: If `config/services.php` adds `env('FOO_API_URL')`, keep `.env.example` in sync — run `.pandawa/scripts/powershell/sync-env-example.ps1 -Fix` (or `scripts/bash/sync-env-example.sh --fix`); `sync-env-example -Check` fails CI if missing. `/pandawa.analyze` checks this (Env sync).
+
+> **Provisional provider (no official API)**: For scrape/fallback services (MPL `id-mpl.com`, futsal Wikipedia `Results`), reuse `.pandawa/templates/laravel/ProvisionalService.php.template` — cache 3h, timeout 15s, `env()` URL empty → scrape branch, fallback static 9 teams. Avoid reinventing per sport.
+
 ## Runtime Status
 
 Keep task state in the checkbox and, when work starts, append a status marker:

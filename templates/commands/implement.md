@@ -63,6 +63,7 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
     **Implementation checkpoint (change tracking)**:
    - Before writing any code, record a rollback point: on a git repo, ensure the working tree state is captured (note the current HEAD; if there are uncommitted changes, tell the user and offer to commit or stash them first).
    - Create/append `FEATURE_DIR/implementation-log.md` with a session header (date, HEAD commit, tasks targeted). After each completed task, append one line: task ID, files created/modified, and a short note. This is the audit trail used for review and rollback.
+   - **Task marker automation**: after each phase (or at end), run the helper to sync `tasks.md` checkboxes from the log instead of manual regex — PowerShell: `.pandawa/scripts/powershell/update-tasks.ps1 -FromLog` (or `-TaskIds T001,T002 -Status done`), Bash: `.pandawa/scripts/bash/update-tasks.sh --from-log` — it writes `- [X] T00x [done]` with LF without BOM and is PS 5.1 compat (no `head`/`&&`).
    - **Windows PowerShell writing note**: avoid `Add-Content ... -Value @"` with embedded `"` and `|` (parser error `Missing expression after unary operator '-'`) — use `Set-Content -Encoding utf8NoBOM` / `Add-Content` with single-quoted strings or a temp file, same pattern as the `check-checklists` helper. Always write `implementation-log.md` and `checklists/*.md` as UTF-8 without BOM + LF.
 
 4. **Project Setup Verification**:
@@ -125,9 +126,9 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
    - **Validation checkpoints**: Verify each phase completion before proceeding
 
 7. Implementation execution rules:
-   - **Setup first**: Initialize project structure, dependencies, configuration
+   - **Setup first**: Initialize project structure, dependencies, configuration — if the feature touches `config/services.php` (Laravel) and adds `env('FOO_API_URL')`, run `.pandawa/scripts/powershell/sync-env-example.ps1 -Fix` (or `scripts/bash/sync-env-example.sh --fix`) to keep `.env.example` in sync, so VPS deploy does not miss the var.
    - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
-   - **Core development**: Implement models, services, CLI commands, endpoints
+   - **Core development**: Implement models, services, CLI commands, endpoints — for a sport/provider without official API (provisional), reuse the template `.pandawa/templates/laravel/ProvisionalService.php.template` (cache 3h, timeout 15s, scrape branch + static fallback) instead of reinventing the MPL/futsal pattern.
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
    - **Mimicry Principle (match existing patterns, don't reinvent)**: in a codebase that already has code, do NOT write a task's implementation from a blank-slate description — first find the nearest existing example of the same kind of thing (an existing controller, service, model, migration, test, error handler, logger call, auth guard) and **mimic its structure, naming, imports, and conventions**. New code should look like it was written by whoever wrote the surrounding code: same error-handling shape, same logging style, same validation approach, same file/module layout. This produces code that fits the project (and passes the field-parity/architecture gates below) far more reliably than inventing a fresh style. Deviate from an existing pattern only when the task explicitly requires it, and say so when you do. On a genuinely greenfield project with no example to copy, follow plan.md and the constitution instead.

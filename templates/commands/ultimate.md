@@ -40,6 +40,8 @@ Each phase requires specific setup scripts. Detect the platform once at the star
 | Analyze      | `scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` | `scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` |
 | Implement    | `scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` | `scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` |
 
+> **win32 PowerShell 5.1 compat**: avoid `head -20` / `python3` / `&&` in command examples — use `Select-Object -First 20` (or `head` only in bash), `python`/`py` fallback (setup-plan already tries `python3` → `python` → `py`), and `; if ($?) { ... }` instead of `&&`. Helpers `check-checklists`, `update-tasks`, `sync-env-example`, `create-issues-from-tasks` are all PS 5.1 tested with LF without BOM writes.
+
 ## Pre-flight: Artifact Scan
 
 Before starting any phase, determine the workflow entry point by scanning existing artifacts.

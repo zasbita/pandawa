@@ -45,8 +45,14 @@ if [[ -f "$TEMPLATE" ]]; then
     if [[ -f "$REPO_ROOT/composer.json" && -f "$REPO_ROOT/artisan" ]] && grep -qi laravel "$REPO_ROOT/composer.json" 2>/dev/null; then
         if grep -q "# \[REMOVE IF UNUSED\] Option 1" "$IMPL_PLAN" 2>/dev/null; then
             # Replace the fenced block containing Option 1/2/3 with Laravel structure (portable via python if available, else sed)
-            if command -v python3 >/dev/null 2>&1; then
-                python3 - "$IMPL_PLAN" << 'PY'
+            # win32 compat: try python3, then python, then py (PS 5.1 often only has python/python.exe)
+            _py=""
+            if command -v python3 >/dev/null 2>&1; then _py="python3"
+            elif command -v python >/dev/null 2>&1; then _py="python"
+            elif command -v py >/dev/null 2>&1; then _py="py"
+            fi
+            if [[ -n "$_py" ]]; then
+                $_py - "$IMPL_PLAN" << 'PY'
 import re, pathlib, sys
 p = pathlib.Path(sys.argv[1])
 text = p.read_text(encoding="utf-8")
@@ -82,7 +88,7 @@ if n:
     print("[pandawa] Detected Laravel monolith — pruned generic Option 1/2/3 template")
 PY
             else
-                echo "[pandawa] Detected Laravel but python3 not available — skipping prune"
+                echo "[pandawa] Detected Laravel but python not available (tried python3/python/py) — skipping prune"
             fi
         fi
     fi

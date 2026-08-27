@@ -1,0 +1,75 @@
+<?php
+// ProvisionalService.php.template — Laravel service for sport without official API (scrape + cache 3h, timeout 15s, fallback static)
+// Copy to app/Services/<Sport>Service.php and adjust staticFallback() + parse logic.
+// Pattern reused in MPL (id-mpl.com scrape) and Timnas Futsal (Wikipedia Results) — 003-005.
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class ProvisionalService
+{
+    // TODO: picks env key: env('MPL_API_URL') empty => scrape path; if set => api path
+    private const CACHE_KEY = 'provisional.upcoming';
+    private const CACHE_TTL_SECONDS = 10800; // 3h
+    private const TIMEOUT_SECONDS = 15;
+
+    /**
+     * @return array<int, array{id:string,date:string,home:string,away:string,league:string}>
+     */
+    public function getUpcomingMatches(): array
+    {
+        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL_SECONDS, function (): array {
+            $url = env('MPL_API_URL', ''); // or FUTSAL_API_URL — replace per sport
+            if ($url !== '') {
+                $data = $this->fetchFromApi($url);
+                if (!empty($data)) return $data;
+            }
+            $scraped = $this->fetchScrape();
+            if (!empty($scraped)) return $scraped;
+            return $this->staticFallback();
+        });
+    }
+
+    /** Official API branch (when provider has URL) */
+    private function fetchFromApi(string $url): array
+    {
+        try {
+            $resp = Http::timeout(self::TIMEOUT_SECONDS)->get($url);
+            if (!$resp->successful()) return [];
+            $json = $resp->json();
+            // TODO: picks: map API json -> {id,date,home,away,league} + filter next 24h / contains entity
+            return $this->normalizeApi($json);
+        } catch (\Throwable $e) {
+            Log::warning('ProvisionalService api failed', ['url' => $url, 'err' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /** Scrape branch (Wikipedia Results, id-mpl.com etc) — primary when MPL_API_URL empty */
+    private function fetchScrape(): array
+    {
+        try {
+            // Example: Wikipedia "Results and fixtures" table, id-mpl.com schedule
+            // TODO: Http::timeout -> get scrape url -> DOM parse
+            // Keep scrape parsing isolated so fallback remains if markup changes.
+            return []; // replace with parsed rows
+        } catch (\Throwable $e) {
+            Log::warning('ProvisionalService scrape failed', ['err' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /** Static 9-team fallback (e.g., MPL 9 teams) — never empty UI */
+    private function staticFallback(): array
+    {
+        // TODO: return static list per sport — ensures UI not empty when both API and scrape fail
+        return [];
+    }
+
+    private function normalizeApi(array $json): array { return []; /* TODO */ }
+
+    public static function clearCache(): void { Cache::forget(self::CACHE_KEY); }
+}

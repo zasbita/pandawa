@@ -116,6 +116,10 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 - Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
 - Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
 
+#### G. Env sync (Laravel)
+
+- If `config/services.php` or `config/*.php` contains `env('FOO_API_URL')` (or any `env('KEY')`), check `.env.example` contains `KEY=` (use `.pandawa/scripts/powershell/sync-env-example.ps1 -Check -Json` or `scripts/bash/sync-env-example.sh --check --json`). Missing keys mean VPS deploy will lack the var despite constitution requiring secrets via `.env`. Flag as MEDIUM (HIGH if the key is for a provisional provider that defaults to empty fallback).
+
 ### 5. Severity Assignment
 
 Use this heuristic to prioritize findings:

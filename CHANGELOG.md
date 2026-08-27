@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.2] - 2026-08-27
+
+### Fixed
+
+- **win32 PowerShell 5.1 compat**: `scripts/bash/setup-plan.sh:48` now tries `python3` → `python` → `py` (PS 5.1 often only has `python.exe`), fixes `python3 not recognized`; docs `templates/commands/ultimate.md:29` adds win32 note to avoid `head -20`/`&&` — use `Select-Object -First 20` / `; if ($?) {}`; helpers already PS 5.1 tested with LF without BOM.
+- **BOM**: `scripts/powershell/update-agent-context.ps1:104` already uses `Set-Utf8NoBomLf` (LF `\n` without BOM, .NET fallback for PS 5.1) — verified, fixes `+E2 88 A9` BOM diff on every `/pandawa.plan`.
+
+### Added
+
+- **tasks marker automation**: New `scripts/powershell/update-tasks.ps1` + `scripts/bash/update-tasks.sh` — auto-mark `tasks.md` `- [X] T00x [done]` from `implementation-log.md` (`-FromLog`/`--from-log`) or explicit `-TaskIds T001,T002 -Status done`; PS 5.1 compat (no `head`/`&&`), LF without BOM; wired into `templates/commands/implement.md:63` checkpoint and `templates/tasks-template.md` marker note.
+- **env sync**: New `scripts/powershell/sync-env-example.ps1` + `scripts/bash/sync-env-example.sh` — parse `config/services.php`/`config/*.php` `env('KEY')`, check/append `.env.example` (`-Check` CI gate, `-Fix` append), JSON mode; `templates/commands/analyze.md:114` adds Env sync check, `templates/commands/implement.md:133` runs sync on services.php changes.
+- **provisional provider template**: New `templates/laravel/ProvisionalService.php.template` — Laravel service for sport without official API (MPL `id-mpl.com` scrape, futsal Wikipedia Results) with cache 3h, timeout 15s, `env()` empty → scrape branch, fallback static 9 teams; reused instead of reinventing per sport (`templates/commands/implement.md:133`, `templates/tasks-template.md`).
+
 ## [0.36.1] - 2026-08-27
 
 ### Fixed
