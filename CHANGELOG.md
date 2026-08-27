@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-08-27
+
+### Added
+
+- **pandawa pentest**: Free-stack integrated pentest `pandawa pentest [--url URL] [--severity low|medium|high|critical] [--json] [--output md] [--sarif sarif.json] [--quick]` — secrets (`gitleaks` or quoted-value fallback, `.env` gitignore), supply (`pip-audit` or manifest hint, floating `@main` check), active DAST (`nuclei -json` if present else security-header checks), counts `critical/high/medium/low` + `verdict`, markdown `docs/security-reports/<date>-pentest.md` / `.pandawa/reports/` auto, SARIF 2.1.0 for GitHub Code Scanning (`src/pandawa_cli/__init__.py:3449`).
+- **Auto pentest on implement**: `pandawa run implement --pentest/--no-pentest --pentest-url URL --pentest-severity high` (default `--no-pentest`, threshold `high`) runs pentest after implement.
+
 ## [0.35.1] - 2026-08-27
 
 ### Fixed

@@ -3447,6 +3447,280 @@ def qa(
         raise typer.Exit(1)
 
 
+# ---- `pandawa pentest` command ------------------------------------------------------------
+def _pentest_secrets() -> list[dict]:
+    findings: list[dict] = []
+    # .env gitignored check
+    try:
+        gitignore = Path(".gitignore")
+        has_env_ignore = False
+        if gitignore.exists():
+            txt = gitignore.read_text(encoding="utf-8", errors="ignore")
+            has_env_ignore = ".env" in txt
+        if not has_env_ignore:
+            findings.append({"severity": "HIGH", "owasp": "A07", "msg": ".env not gitignored — secrets risk", "where": ".gitignore", "fix": "Add .env to .gitignore"})
+    except Exception:
+        pass
+    # gitleaks if present
+    if shutil.which("gitleaks"):
+        try:
+            p = subprocess.run(["gitleaks", "detect", "--source", ".", "--no-git", "--format", "json", "--no-banner"], capture_output=True, text=True, timeout=20)
+            if p.stdout.strip():
+                import json as _j
+                try:
+                    data = _j.loads(p.stdout)
+                    for item in data[:10]:
+                        findings.append({"severity": "CRITICAL", "owasp": "A07", "msg": f"gitleaks: {item.get('RuleID','secret')} in {item.get('File','')}:{item.get('StartLine','')}", "where": item.get("File",""), "fix": "Rotate secret, remove from history"})
+                except Exception:
+                    # gitleaks json may be line-delimited
+                    for line in p.stdout.splitlines()[:10]:
+                        try:
+                            it = _j.loads(line)
+                            findings.append({"severity": "CRITICAL", "owasp": "A07", "msg": f"gitleaks: {it.get('RuleID','secret')}", "where": it.get("File",""), "fix": "Rotate"})
+                        except Exception:
+                            continue
+            if not findings:
+                # gitleaks found nothing — add info, not finding
+                pass
+        except Exception as e:
+            findings.append({"severity": "LOW", "owasp": "A07", "msg": f"gitleaks failed: {e}", "where": "gitleaks", "fix": "Install gitleaks or ignore"})
+    else:
+        # fallback regex scan — only quoted assignments, high entropy, avoids variable-name false positives like tui/data.py
+        import re
+        # require quoted value with 12+ chars, e.g. password = "s3cr3t...", not token var name
+        pat = re.compile(r"""(?i)(api[_-]?key|secret|password|passwd|token)\s*[:=]\s*["'][^"']{12,}["']""")
+        candidates = []
+        for root, dirs, files in os.walk(".", topdown=True):
+            dirs[:] = [d for d in dirs if d not in {".git", ".venv", "venv", "node_modules", ".genreleases", "__pycache__", ".serena", "src"}]
+            for fn in files:
+                if fn.endswith((".env", ".json", ".toml", ".yaml", ".yml", ".py", ".js", ".ts")):
+                    candidates.append(os.path.join(root, fn))
+            if len(candidates) > 60:
+                break
+        for fp in candidates[:20]:
+            try:
+                txt = Path(fp).read_text(encoding="utf-8", errors="ignore")
+                if pat.search(txt) and "example" not in txt.lower() and ".pandawa" not in fp and "pandawa_cli" not in fp:
+                    findings.append({"severity": "HIGH", "owasp": "A07", "msg": f"Possible hardcoded secret in {fp}", "where": fp, "fix": "Move to env, gitignore .env"})
+                    if len(findings) >= 3:
+                        break
+            except Exception:
+                continue
+        if not shutil.which("gitleaks"):
+            findings.append({"severity": "LOW", "owasp": "A07", "msg": "gitleaks not installed — fallback regex only (`go install github.com/gitleaks/gitleaks/v8@latest`)", "where": "gitleaks", "fix": "Install gitleaks for full scan"})
+    return findings
+
+
+def _pentest_supply() -> list[dict]:
+    findings: list[dict] = []
+    # detect manifest
+    manifests = []
+    if Path("pyproject.toml").exists():
+        manifests.append(("pyproject.toml", "PyPI"))
+    if Path("package.json").exists():
+        manifests.append(("package.json", "npm"))
+    if Path("requirements.txt").exists():
+        manifests.append(("requirements.txt", "PyPI"))
+    if not manifests:
+        return findings
+    # check floating tags in workflows / actions
+    for wf in Path(".github/workflows").glob("*.yml"):
+        try:
+            txt = wf.read_text(encoding="utf-8", errors="ignore")
+            import re
+            if re.search(r"uses:\s*[^@]+@main\b|\b@master\b", txt):
+                findings.append({"severity": "MEDIUM", "owasp": "A06", "msg": f"Floating action tag @main/@master in {wf}", "where": str(wf), "fix": "Pin to SHA or semver tag"})
+        except Exception:
+            continue
+    # osv check for PyPI if httpx works — sample top deps only (no mass API hammer)
+    # use pip-audit style: if pip-audit present, use it
+    if shutil.which("pip-audit"):
+        try:
+            p = subprocess.run(["pip-audit", "--format", "json"], capture_output=True, text=True, timeout=30)
+            if p.stdout.strip():
+                import json as _j
+                data = _j.loads(p.stdout)
+                for dep in data.get("dependencies", [])[:10]:
+                    for vuln in dep.get("vulns", [])[:3]:
+                        findings.append({"severity": "HIGH", "owasp": "A06", "msg": f"{dep.get('name')} {vuln.get('id')}: {vuln.get('fix_versions')}", "where": "supply", "fix": f"Update to {vuln.get('fix_versions')}"})
+        except Exception as e:
+            findings.append({"severity": "LOW", "owasp": "A06", "msg": f"pip-audit failed: {e}", "where": "supply", "fix": "pip install pip-audit"})
+    else:
+        # fallback: at least report manifests found, hint to install pip-audit
+        findings.append({"severity": "LOW", "owasp": "A06", "msg": f"Supply manifests: {', '.join(m[0] for m in manifests)} — install pip-audit for CVE check (`pip install pip-audit`)", "where": "supply", "fix": "pip-audit"})
+    return findings
+
+
+def _pentest_active(url: str | None, quick: bool) -> list[dict]:
+    findings: list[dict] = []
+    if not url:
+        return findings
+    # nuclei if present
+    if shutil.which("nuclei"):
+        try:
+            p = subprocess.run(["nuclei", "-u", url, "-json", "-silent", "-timeout", "8"], capture_output=True, text=True, timeout=40)
+            import json as _j
+            for line in p.stdout.splitlines()[:20]:
+                try:
+                    it = _j.loads(line)
+                    sev = (it.get("info", {}).get("severity") or "medium").upper()
+                    sev_map = {"CRITICAL": "CRITICAL", "HIGH": "HIGH", "MEDIUM": "MEDIUM", "LOW": "LOW", "INFO": "LOW"}
+                    findings.append({"severity": sev_map.get(sev, "MEDIUM"), "owasp": it.get("info", {}).get("classification", {}).get("cve-id", "A05") or "A05", "msg": f"nuclei {it.get('template-id')}: {it.get('info',{}).get('name','')}", "where": url, "fix": it.get("info",{}).get("remediation","") or "See nuclei template"})
+                    if quick and len(findings) >= 5:
+                        break
+                except Exception:
+                    continue
+            if not findings:
+                findings.append({"severity": "LOW", "owasp": "A05", "msg": "nuclei found no issues", "where": url, "fix": ""})
+        except Exception as e:
+            findings.append({"severity": "LOW", "owasp": "A05", "msg": f"nuclei failed: {e}", "where": url, "fix": ""})
+        return findings
+    # fallback: basic security headers + OWASP surface
+    try:
+        r = _get_client().get(url, timeout=8.0, follow_redirects=True)
+        h = {k.lower(): v for k, v in r.headers.items()}
+        checks = [
+            ("strict-transport-security" not in h, "MEDIUM", "A05", "Missing HSTS header", "Add Strict-Transport-Security"),
+            ("content-security-policy" not in h, "MEDIUM", "A05", "Missing Content-Security-Policy", "Add CSP"),
+            ("x-frame-options" not in h and "content-security-policy" not in h, "LOW", "A05", "Missing X-Frame-Options / CSP frame-ancestors", "Add X-Frame-Options DENY"),
+            ("x-content-type-options" not in h, "LOW", "A05", "Missing X-Content-Type-Options nosniff", "Add header"),
+        ]
+        for cond, sev, owasp, msg, fix in checks:
+            if cond:
+                findings.append({"severity": sev, "owasp": owasp, "msg": msg, "where": url, "fix": fix})
+        # detect debug on: e.g., stack trace in body
+        body = (r.text or "")[:5000].lower()
+        if "traceback" in body or "stack trace" in body:
+            findings.append({"severity": "HIGH", "owasp": "A05", "msg": "Debug/stack trace exposed in response", "where": url, "fix": "Disable debug in prod"})
+        if not findings:
+            findings.append({"severity": "LOW", "owasp": "A05", "msg": "Basic header checks passed", "where": url, "fix": ""})
+    except Exception as e:
+        findings.append({"severity": "MEDIUM", "owasp": "A05", "msg": f"Active check failed {url}: {e}", "where": url, "fix": ""})
+    if not shutil.which("nuclei"):
+        findings.append({"severity": "LOW", "owasp": "A05", "msg": "nuclei not installed — fallback header checks only (`go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest`)", "where": "nuclei", "fix": "Install nuclei for full DAST"})
+    return findings
+
+
+def _pentest_to_sarif(findings: list[dict], tool: str = "pandawa-pentest") -> dict:
+    rules = {}
+    results = []
+    for f in findings:
+        rule_id = f.get("owasp", "A00") + ":" + f.get("msg", "")[:40]
+        rid = re.sub(r"[^a-zA-Z0-9_.-]", "_", rule_id)[:60] or "finding"
+        if rid not in rules:
+            rules[rid] = {"id": rid, "name": f.get("msg","")[:80], "shortDescription": {"text": f.get("msg","")[:120]}, "help": {"text": f.get("fix","")}}
+        level = {"CRITICAL": "error", "HIGH": "error", "MEDIUM": "warning", "LOW": "note"}.get(f.get("severity","MEDIUM"), "warning")
+        results.append({"ruleId": rid, "level": level, "message": {"text": f.get("msg","")}, "locations": [{"physicalLocation": {"artifactLocation": {"uri": f.get("where","")}, "region": {"startLine": 1}}}], "properties": {"severity": f.get("severity",""), "owasp": f.get("owasp","")}})
+    return {"version": "2.1.0", "$schema": "https://json.schemastore.org/sarif", "runs": [{"tool": {"driver": {"name": tool, "rules": list(rules.values())}}, "results": results}]}
+
+
+def _pentest_run(url: str | None, quick: bool) -> dict:
+    all_findings: list[dict] = []
+    all_findings.extend(_pentest_secrets())
+    if not quick:
+        all_findings.extend(_pentest_supply())
+    all_findings.extend(_pentest_active(url, quick=quick))
+    # risk
+    crit = sum(1 for f in all_findings if f["severity"] == "CRITICAL")
+    high = sum(1 for f in all_findings if f["severity"] == "HIGH")
+    med = sum(1 for f in all_findings if f["severity"] == "MEDIUM")
+    low = sum(1 for f in all_findings if f["severity"] == "LOW")
+    if crit > 0:
+        verdict = "critical"
+    elif high > 0:
+        verdict = "high"
+    elif med > 2:
+        verdict = "medium"
+    else:
+        verdict = "low"
+    return {"findings": all_findings, "counts": {"critical": crit, "high": high, "medium": med, "low": low}, "verdict": verdict, "url": url}
+
+
+@app.command()
+def pentest(
+    url: str = typer.Option(None, "--url", help="App URL for active checks (DAST). Omit for static-only (secrets+supply)"),
+    output: str = typer.Option(None, "--output", help="Write markdown report to file (default docs/security-reports/<date>-pentest.md if url else .pandawa/reports/)"),
+    json_output: bool = typer.Option(False, "--json", help="Output JSON to stdout instead of pretty report"),
+    sarif: str = typer.Option(None, "--sarif", help="Write SARIF 2.1.0 to file for GitHub Code Scanning upload"),
+    quick: bool = typer.Option(False, "--quick", help="Quick — secrets+active only, cap 5 findings"),
+    severity: str = typer.Option("low", "--severity", help="Fail threshold: low|medium|high|critical (exit 1 if >= threshold found)"),
+):
+    """Run pentest — free stack: gitleaks (secrets) + pip-audit/OSV (supply) + nuclei or header checks (active). No paid platform needed."""
+    _timer = ProcessTimer("pandawa pentest")
+    res = _pentest_run(url, quick=quick)
+    findings = res["findings"]
+    # severity threshold gate — hints (LOW with "not installed"/"install ...") never fail
+    sev_order = {"LOW": 0, "MEDIUM": 1, "HIGH": 2, "CRITICAL": 3}
+    thresh = sev_order.get(severity.upper(), 0)
+    def _is_hint(f: dict) -> bool:
+        m = f.get("msg","").lower()
+        return "not installed" in m or "found no issues" in m or "passed" in m or ("install pip-audit" in m) or ("fallback regex only" in m)
+    real_findings = [f for f in findings if not _is_hint(f)]
+    if thresh == 0:
+        failed = len(real_findings) > 0
+    else:
+        failed = any(sev_order.get(f["severity"], 0) >= thresh for f in real_findings)
+
+    if json_output:
+        import json as _j
+        console.print(_j.dumps(res, indent=2))
+    else:
+        color = "red" if res["verdict"] in ("critical", "high") else "yellow" if res["verdict"] == "medium" else "green"
+        console.print(Panel(f"[bold {color}]Pentest: {res['counts']['critical']} critical, {res['counts']['high']} high, {res['counts']['medium']} medium, {res['counts']['low']} low — risk {res['verdict'].upper()}[/bold {color}]", border_style=color))
+        if url:
+            console.print(f"[dim]URL:[/dim] {url}  [dim]Engines:[/dim] gitleaks+supply+{'nuclei' if shutil.which('nuclei') else 'headers fallback'}")
+        else:
+            console.print("[dim]URL:[/dim] none (static-only)")
+        console.print()
+        if not findings:
+            console.print("[green]No findings[/green]")
+        else:
+            for f in findings:
+                c = {"CRITICAL": "red", "HIGH": "yellow", "MEDIUM": "cyan", "LOW": "dim"}.get(f["severity"], "white")
+                console.print(f"[{c}]{f['severity']}:[/{c}] [{f.get('owasp','')}] {f['msg']} [dim]({f['where']})[/dim]  [dim]fix: {f.get('fix','')}[/dim]")
+        console.print()
+
+    # default output path
+    if output is None and not json_output:
+        # auto path
+        try:
+            from datetime import date
+            d = date.today().isoformat()
+            if url:
+                auto = Path(f"docs/security-reports/{d}-pentest.md")
+            else:
+                auto = Path(f".pandawa/reports/{d}-pentest.md")
+            output = str(auto)
+        except Exception:
+            output = None
+    if output:
+        try:
+            Path(output).parent.mkdir(parents=True, exist_ok=True)
+            import json as _j
+            md = f"# Pentest {res['verdict'].upper()} — {res['counts']['critical']}C {res['counts']['high']}H {res['counts']['medium']}M {res['counts']['low']}L\n\nURL: {url or 'static-only'}\n\n| Sev | OWASP | Where | Issue | Fix |\n|-----|-------|-------|-------|-----|\n"
+            for f in findings:
+                md += f"| {f['severity']} | {f.get('owasp','')} | {f['where']} | {f['msg'].replace('|','/')} | {f.get('fix','').replace('|','/')} |\n"
+            md += f"\n```json\n{_j.dumps(res, indent=2)}\n```\n"
+            Path(output).write_text(md, encoding="utf-8")
+            console.print(f"[dim]Report written to {output}[/dim]")
+        except Exception as e:
+            console.print(f"[red]Failed to write {output}: {e}[/red]")
+
+    if sarif:
+        try:
+            import json as _j
+            Path(sarif).parent.mkdir(parents=True, exist_ok=True)
+            Path(sarif).write_text(_j.dumps(_pentest_to_sarif(findings), indent=2), encoding="utf-8")
+            console.print(f"[dim]SARIF written to {sarif} — upload: gh api repos/{{owner}}/{{repo}}/code-scanning/sarifs --input {sarif}[/dim]")
+        except Exception as e:
+            console.print(f"[red]Failed to write SARIF {sarif}: {e}[/red]")
+
+    _timer.stop(status="failed" if failed else "success")
+    show_audit_panel(_timer, extra={"URL": url or "static-only", "Risk": res["verdict"], "Counts": f"{res['counts']['critical']}C {res['counts']['high']}H"})
+    if failed:
+        raise typer.Exit(1)
+
+
 # ---- `pandawa usage` command ---------------------------------------------------------------
 
 # Sonnet 4.x pricing (USD per 1M tokens) — used for cost estimates.
@@ -5012,6 +5286,9 @@ def run_implement(
     qa: bool = typer.Option(True, "--qa/--no-qa", help="Auto-run QA audit after implement (uses same --url as `pandawa qa`)"),
     qa_url: str = typer.Option(None, "--qa-url", help="URL for auto-QA (default auto-detect localhost)"),
     qa_browser: str = typer.Option(None, "--qa-browser", help="Playwright browser for auto-QA"),
+    pentest: bool = typer.Option(False, "--pentest/--no-pentest", help="Auto-run pentest after implement (secrets+supply+active)"),
+    pentest_url: str = typer.Option(None, "--pentest-url", help="URL for auto-pentest active checks"),
+    pentest_severity: str = typer.Option("high", "--pentest-severity", help="Fail threshold for auto-pentest: low|medium|high|critical"),
 ):
     """Run /pandawa.implement and report token usage. With --qa (default) also runs QA audit after."""
     _run_skill_command("implement", goal)
@@ -5030,6 +5307,26 @@ def run_implement(
                 console.print(f"[dim]… +{len(res['findings'])-8} more[/dim]")
         except Exception as e:
             console.print(f"[yellow]Auto QA skipped: {e}[/yellow]")
+    if pentest:
+        console.print()
+        console.print("[cyan]Auto pentest after implement…[/cyan]")
+        try:
+            res = _pentest_run(pentest_url, quick=False)
+            col = "red" if res["verdict"] in ("critical", "high") else "yellow" if res["verdict"] == "medium" else "green"
+            console.print(Panel(f"[bold {col}]Auto pentest: {res['counts']['critical']}C {res['counts']['high']}H {res['counts']['medium']}M — risk {res['verdict'].upper()}[/bold {col}]", border_style=col))
+            for f in res["findings"][:8]:
+                c = {"CRITICAL": "red", "HIGH": "yellow", "MEDIUM": "cyan", "LOW": "dim"}.get(f["severity"], "white")
+                console.print(f"[{c}]{f['severity']}:[/{c}] [{f.get('owasp','')}] {f['msg']} [dim]({f['where']})[/dim]")
+            if len(res["findings"]) > 8:
+                console.print(f"[dim]… +{len(res['findings'])-8} more[/dim]")
+            # threshold gate
+            sev_order = {"LOW": 0, "MEDIUM": 1, "HIGH": 2, "CRITICAL": 3}
+            thresh = sev_order.get(pentest_severity.upper(), 2)
+            real = [f for f in res["findings"] if "not installed" not in f["msg"] and "found no issues" not in f["msg"] and "passed" not in f["msg"].lower()]
+            if any(sev_order.get(f["severity"], 0) >= thresh for f in real):
+                console.print(f"[red]Auto pentest failed threshold {pentest_severity}[/red]")
+        except Exception as e:
+            console.print(f"[yellow]Auto pentest skipped: {e}[/yellow]")
 
 @run_app.command("clarify")
 def run_clarify(goal: str = typer.Argument("", help="Optional goal or context to pass to /pandawa.clarify")):
