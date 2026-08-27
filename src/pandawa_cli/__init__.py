@@ -136,10 +136,12 @@ def _require_gitlab_token(cli_token: str | None = None) -> str:
 
     console.print()
     console.print(Panel(
-        "A GitLab token is required to download templates from [cyan]git.neuron.id[/cyan].\n\n"
-        "Create one at: [cyan]https://git.neuron.id/-/user_settings/personal_access_tokens[/cyan]\n"
-        "Required scope: [bold]read_api[/bold]",
-        title="[yellow]GitLab Token Required[/yellow]",
+        "Templates are fetched from [cyan]github.com/zasbita/pandawa[/cyan] (public, no token needed).\n"
+        "A token only helps with rate limits or private installs.\n\n"
+        "GitHub: set [cyan]GITHUB_TOKEN[/cyan] or [cyan]GH_TOKEN[/cyan] (optional)\n"
+        "Private GitLab: set [cyan]GL_TOKEN[/cyan] or pass [cyan]--gitlab-token[/cyan]\n"
+        "Create at: [cyan]https://github.com/settings/tokens[/cyan] or [cyan]https://git.neuron.id/-/user_settings/personal_access_tokens[/cyan] (internal)",
+        title="[yellow]Token Optional[/yellow]",
         border_style="yellow",
         padding=(1, 2),
     ))

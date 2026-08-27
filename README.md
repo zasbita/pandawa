@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-    <a href="https://git.neuron.id/research/pandawa/-/pipelines"><img src="https://git.neuron.id/research/pandawa/badges/main/pipeline.svg" alt="Pipeline"/></a>
-    <a href="https://git.neuron.id/research/pandawa/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
-    <a href="https://git.neuron.id/research/pandawa"><img src="https://img.shields.io/badge/source-git.neuron.id-orange" alt="Source"/></a>
+    <a href="https://github.com/zasbita/pandawa/actions"><img src="https://github.com/zasbita/pandawa/actions/workflows/lint.yml/badge.svg" alt="CI"/></a>
+    <a href="https://github.com/zasbita/pandawa/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/></a>
+    <a href="https://github.com/zasbita/pandawa"><img src="https://img.shields.io/badge/source-github.com-blue" alt="Source"/></a>
 </p>
 
 ---
@@ -923,7 +923,7 @@ See [Troubleshooting Guide](./docs/troubleshooting.md) or open an issue.
 
 ## 💬 Support
 
-For support, please check our [Support Guide](./SUPPORT.md) or open an issue on GitHub. For Neuron internal use, the canonical source remains [git.neuron.id/research/pandawa](https://git.neuron.id/research/pandawa).
+For support, please check our [Support Guide](./SUPPORT.md) or open an issue on GitHub. Canonical source is [github.com/zasbita/pandawa](https://github.com/zasbita/pandawa).
 
 ## 📄 License
 

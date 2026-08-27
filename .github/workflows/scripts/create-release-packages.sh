@@ -234,7 +234,16 @@ build_variant() {
       mkdir -p "$base_dir/.bob/commands"
       generate_commands bob md "\$ARGUMENTS" "$base_dir/.bob/commands" "$script" ".bob/commands" ;;
   esac
-  ( cd "$base_dir" && zip -r "../pandawa-template-${agent}-${script}-${NEW_VERSION}.zip" . )
+  if command -v zip >/dev/null 2>&1; then
+    ( cd "$base_dir" && zip -r "../pandawa-template-${agent}-${script}-${NEW_VERSION}.zip" . )
+  else
+    # Windows fallback: Git Bash without zip — use PowerShell Compress-Archive
+    # Convert bash path to Windows path for PowerShell
+    win_base=$(cygpath -w "$base_dir" 2>/dev/null || echo "$base_dir")
+    win_dest=$(cygpath -w "$GENRELEASES_DIR/pandawa-template-${agent}-${script}-${NEW_VERSION}.zip" 2>/dev/null || echo "$GENRELEASES_DIR/pandawa-template-${agent}-${script}-${NEW_VERSION}.zip")
+    powershell.exe -NoProfile -Command "Compress-Archive -Path '${win_base}/*' -DestinationPath '${win_dest}' -Force" || \
+    powershell -NoProfile -Command "Compress-Archive -Path '${win_base}/*' -DestinationPath '${win_dest}' -Force"
+  fi
   echo "Created $GENRELEASES_DIR/pandawa-template-${agent}-${script}-${NEW_VERSION}.zip"
 }
 

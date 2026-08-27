@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.35.1] - 2026-08-27
+
+### Fixed
+
+- **README git.neuron.id remaining**: Replace pipeline/source badges `git.neuron.id/research/pandawa` → `github.com/zasbita/pandawa` (GitHub Actions `lint.yml`, license, source) and canonical source note `github.com/zasbita/pandawa` (`README.md:11`). Token prompt `git.neuron.id` → GitHub public no-token (optional `GITHUB_TOKEN`/`GL_TOKEN`) (`src/pandawa_cli/__init__.py:139`).
+
 ## [0.35.0] - 2026-08-27
 
 ### Fixed
