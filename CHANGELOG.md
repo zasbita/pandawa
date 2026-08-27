@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-08-27
+
+### Fixed
+
+- **implement checklist pipe (P1)**: `Write-Host "| Checklist | …"` pipe escaping `Missing expression after unary operator '-'` fixed via new helpers `scripts/powershell/check-checklists.ps1 -Json` + `scripts/bash/check-checklists.sh --json` that scan `FEATURE_DIR/checklists/*.md` and return `{checklists:[{file,total,completed,incomplete,status}],overall}`; `templates/commands/implement.md:2` now calls helpers instead of `Get-Content | Select-String` with raw `|`; implementation-log note adds `Set-Content -Encoding utf8NoBOM` / temp file to avoid `@"` quoting.
+- **.gitignore supabase noise (P2)**: Add `supabase/.temp/` + `.supabase/` + `.temp/` (Supabase CLI `supabase link`) to `.gitignore`; `templates/commands/implement.md:4` only requires `.dockerignore` if `Dockerfile*` present (no noisy FAIL) and adds Supabase ignore pattern to common list.
+- **tasks parallel [P] (P2)**: `templates/tasks-template.md:17` adds strict rule `[P]` only if different files AND no same-table/same-file dependency (e.g., `supabase/*.sql` create vs verify must be sequential) — `/pandawa.analyze` O1; adds Supabase grants split and pint `fix-before-test` hint.
+- **pint gate (P2)**: `templates/commands/implement.md:8` notes `pint` fix before `pint --test` (fails on `new_with_parentheses, fully_qualified_strict_types` after generation).
+- **AGENTS.md CRLF/BOM (P3)**: `scripts/powershell/update-agent-context.ps1` writes via new `Set-Utf8NoBomLf` helper (UTF-8 without BOM + LF `"\n"`), fallback via .NET `UTF8Encoding(false)` for Windows PowerShell 5.1; fixes `git diff` CRLF/BOM warning (`﻿# AGENTS.md`).
+
+### Added
+
+- **Supabase grants doc**: New `templates/supabase-README.md` — manual dashboard vs `npx supabase db execute --file supabase/*_grants.sql --linked` / `psql "$DATABASE_URL" -f ...`, verify via tinker, split `T00x Apply (manual)` vs `T00y Verify`; `templates/commands/implement.md:7` references it for `supabase/*_grants.sql` tasks (cannot GRANT via `SupabaseService` REST `42501`).
+- **check-checklists helpers**: `scripts/bash/check-checklists.sh` + `scripts/powershell/check-checklists.ps1` (see above) included in release `scripts/` copy.
+
 ## [0.34.0] - 2026-08-27
 
 ### Added

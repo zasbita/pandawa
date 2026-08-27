@@ -45,5 +45,10 @@ env/
 *.zip
 sdd-*/
 
+# Supabase CLI (from `npx supabase` / `supabase link`)
+supabase/.temp/
+.supabase/
+.temp/
+
 # Separate nested repo (own remote, not a submodule of this repo)
 /rudis-marketplace-tooling/

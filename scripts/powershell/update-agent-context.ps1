@@ -94,11 +94,30 @@ function Write-WarningMsg {
 }
 
 function Write-Err { 
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$Message
-    )
-    Write-Host "ERROR: $Message" -ForegroundColor Red 
+     param(
+         [Parameter(Mandatory=$true)]
+         [string]$Message
+     )
+     Write-Host "ERROR: $Message" -ForegroundColor Red 
+ }
+
+function Set-Utf8NoBomLf {
+    param([Parameter(Mandatory=$true)][string]$Path, [Parameter(Mandatory=$true)][string]$Content)
+    $lf = $Content -replace "`r`n","`n" -replace "`r","`n"
+    # PowerShell 7+ has utf8NoBOM; Windows PowerShell 5.1 needs .NET fallback
+    try {
+        # Probe if utf8NoBOM is supported
+        $null = Get-Help Set-Content -Parameter Encoding -ErrorAction Stop | Out-String
+        Set-Content -LiteralPath $Path -Value $lf -NoNewline -Encoding utf8NoBOM -ErrorAction Stop
+        return
+    } catch {}
+    try {
+        Set-Content -LiteralPath $Path -Value $lf -NoNewline -Encoding utf8NoBOM -ErrorAction Stop
+        return
+    } catch {}
+    # .NET fallback: UTF8 without BOM + LF, no trailing newline beyond content
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($Path, $lf, $utf8NoBom)
 }
 
 function Validate-Environment {
@@ -259,7 +278,7 @@ function New-AgentFile {
 
     $parent = Split-Path -Parent $TargetFile
     if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent | Out-Null }
-    Set-Content -LiteralPath $TargetFile -Value $content -NoNewline -Encoding utf8
+    Set-Utf8NoBomLf -Path $TargetFile -Content $content
     Remove-Item $temp -Force
     return $true
 }
@@ -333,7 +352,7 @@ function Update-ExistingAgentFile {
         $newTechEntries | ForEach-Object { $output.Add($_) }
     }
 
-    Set-Content -LiteralPath $TargetFile -Value ($output -join [Environment]::NewLine) -Encoding utf8
+    Set-Utf8NoBomLf -Path $TargetFile -Content ($output -join "`n")
     return $true
 }
 

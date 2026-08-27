@@ -23,6 +23,12 @@ description: "Task list template for feature implementation"
 
 > **GitHub Issues (grouping)**: Do NOT create one issue per T00x — too noisy. Group into 3–5 issues per Bolt: Foundational, US1, US2, US3, Polish. Use `scripts/powershell/create-issues-from-tasks.ps1` (or `scripts/bash/create-issues-from-tasks.sh`) which parses `tasks.md` via `--body-file` temp files (fixes Windows `gh issue create --body "multi line"` quoting), dedupes via `gh issue list`, and throttles. Example: `create-issues-from-tasks.ps1 -GroupBy story -DryRun` then without `-DryRun`. The checklist format below (`- [ ] T001 [US1] ...`) is machine-parseable — keep `[ID] [P?]` prefix and add `[USx] [FR-xxx]` on every functional task so the script and `/pandawa.analyze` can filter by story/FR.
 
+> **Parallel `[P]` rule (strict)**: `[P]` only if **different files AND no same-table/same-file dependency**. Do NOT mark two tasks `[P]` that touch `supabase/*.sql` (or the same migration/table) — the verify task reads the same file/table the create task writes. Example violation fixed in `002-wave2-migration`: `T002 [P] supabase/wave2_grants.sql` + `T003 verify same` → must be sequential. `/pandawa.analyze` flags this as `O1`.
+
+> **Supabase grants**: `supabase/*_grants.sql` is **manual** (see `.pandawa/templates/supabase-README.md`). Split into `T00x Apply grants (manual Dashboard / supabase db execute)` vs `T00y Verify via tinker/SELECT` — never `GRANT` via `SupabaseService` REST.
+
+> **Pint gate**: If PHP/Laravel, run `pint` (fix) **before** `pint --test` in the phase gate. `pint --test` fails on `new_with_parentheses, fully_qualified_strict_types` after generation — auto-fix first, then test. Split tasks as `Create test + Run pint + Run test` if needed.
+
 ## Runtime Status
 
 Keep task state in the checkbox and, when work starts, append a status marker:

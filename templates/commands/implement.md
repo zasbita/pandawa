@@ -33,34 +33,19 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
    - When a task must create a file in a directory that does not exist yet, create the directory first — a missing folder is not an error.
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
-   - Scan all checklist files in the checklists/ directory
-   - For each checklist, count:
-     - Total items: All lines matching `- [ ]` or `- [X]` or `- [x]`
-     - Completed items: Lines matching `- [X]` or `- [x]`
-     - Incomplete items: Lines matching `- [ ]`
-   - Create a status table:
-
-     ```text
-     | Checklist | Total | Completed | Incomplete | Status |
-     |-----------|-------|-----------|------------|--------|
-     | ux.md     | 12    | 12        | 0          | ✓ PASS |
-     | test.md   | 8     | 5         | 3          | ✗ FAIL |
-     | security.md | 6   | 6         | 0          | ✓ PASS |
-     ```
-
-   - Calculate overall status:
-     - **PASS**: All checklists have 0 incomplete items
-     - **FAIL**: One or more checklists have incomplete items
-
-   - **If any checklist is incomplete**:
-     - Display the table with incomplete item counts
+   - Run the helper (avoids PowerShell pipe-escaping of `|` in `Write-Host`):
+     - Bash: `.pandawa/scripts/bash/check-checklists.sh --json` (or without `--json` for markdown table)
+     - PowerShell: `.pandawa/scripts/powershell/check-checklists.ps1 -Json`
+   - The helper scans `FEATURE_DIR/checklists/*.md`, counts per file `total/completed/incomplete` via `^\s*-\s*\[[ xX]\]` and returns JSON `{checklists:[{file,total,completed,incomplete,status}],overall,total,completed,incomplete}`. It handles `|` safely — do **not** reconstruct the table via `Write-Host "| Checklist | ..."` or `Get-Content ... | Select-String '- \[x\]' | Measure-Object` with raw pipes; use the helper and, if you need a table, write via temp file or `Write-Output` without `|` escaping issues.
+   - `overall` is `PASS` only if every checklist has 0 incomplete; else `FAIL`.
+   - **If `overall == FAIL`**:
+     - Display the helper's table/JSON
      - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
      - Wait for user response before continuing
      - If user says "no" or "wait" or "stop", halt execution
      - If user says "yes" or "proceed" or "continue", proceed to step 3
-
-   - **If all checklists are complete**:
-     - Display the table showing all checklists passed
+   - **If `overall == PASS`**:
+     - Display the helper output showing all passed
      - Automatically proceed to step 3
 
 3. Load and analyze the implementation context:
@@ -75,9 +60,10 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
    - **REQUIRED — requirement-coverage precondition (hard gate)**: read spec.md's Functional Requirements and Success Criteria, then confirm coverage: every `FR-###` is cited by at least one task in tasks.md (tasks carry `[FR-###]` citations — see `/pandawa.tasks`), and every `SC-###` is achievable by the tasks present (tasks do NOT cite SC IDs, so map each SC to the tasks/FRs that satisfy it by inference). If any `FR-###` has zero task citations, or any `SC-###` has no tasks that would achieve it, do NOT start implementing: either add the missing task(s), or obtain an explicit user waiver recording that requirement as out-of-scope (log it in implementation-log.md). Silently implementing a spec with uncovered requirements is a gate failure.
    - **REQUIRED for any task touching UI**: read the spec's **UI/UX & Screens** section (and the plan's carried-forward copy) and build each screen to that intent — the screen inventory, per-screen states (loading/empty/error/populated), and primary interactions — not just generic FE-011 element compliance.
 
-   **Implementation checkpoint (change tracking)**:
+    **Implementation checkpoint (change tracking)**:
    - Before writing any code, record a rollback point: on a git repo, ensure the working tree state is captured (note the current HEAD; if there are uncommitted changes, tell the user and offer to commit or stash them first).
    - Create/append `FEATURE_DIR/implementation-log.md` with a session header (date, HEAD commit, tasks targeted). After each completed task, append one line: task ID, files created/modified, and a short note. This is the audit trail used for review and rollback.
+   - **Windows PowerShell writing note**: avoid `Add-Content ... -Value @"` with embedded `"` and `|` (parser error `Missing expression after unary operator '-'`) — use `Set-Content -Encoding utf8NoBOM` / `Add-Content` with single-quoted strings or a temp file, same pattern as the `check-checklists` helper. Always write `implementation-log.md` and `checklists/*.md` as UTF-8 without BOM + LF.
 
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
@@ -89,7 +75,8 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
+   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore (only then; if no Dockerfile* present, skip and do NOT log missing .dockerignore as FAIL — avoids noisy verification)
+   - Check if supabase/ exists → ensure .gitignore contains `supabase/.temp/` and `.supabase/` / `.temp/` (Supabase CLI creates these on `npx supabase link`; otherwise `git status` is noisy — see `templates/supabase-README.md`)
    - Check if .eslintrc* exists → create/verify .eslintignore
    - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
    - Check if .prettierrc* exists → create/verify .prettierignore
@@ -108,6 +95,7 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
    - **Go**: `*.exe`, `*.test`, `vendor/`, `*.out`
    - **Ruby**: `.bundle/`, `log/`, `tmp/`, `*.gem`, `vendor/bundle/`
    - **PHP**: `vendor/`, `*.log`, `*.cache`, `*.env`
+   - **Supabase**: `supabase/.temp/`, `.supabase/`, `.temp/` (CLI temp from `npx supabase link`; add to `.gitignore` if `supabase/` present)
    - **Rust**: `target/`, `debug/`, `release/`, `*.rs.bk`, `*.rlib`, `*.prof*`, `.idea/`, `*.log`, `.env*`
    - **Kotlin**: `build/`, `out/`, `.gradle/`, `.idea/`, `*.class`, `*.jar`, `*.iml`, `*.log`, `.env*`
    - **C++**: `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.so`, `*.a`, `*.exe`, `*.dll`, `.idea/`, `*.log`, `.env*`
@@ -143,9 +131,10 @@ When you cannot resolve a decision confidently from tasks.md, plan.md, the code,
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
    - **Mimicry Principle (match existing patterns, don't reinvent)**: in a codebase that already has code, do NOT write a task's implementation from a blank-slate description — first find the nearest existing example of the same kind of thing (an existing controller, service, model, migration, test, error handler, logger call, auth guard) and **mimic its structure, naming, imports, and conventions**. New code should look like it was written by whoever wrote the surrounding code: same error-handling shape, same logging style, same validation approach, same file/module layout. This produces code that fits the project (and passes the field-parity/architecture gates below) far more reliably than inventing a fresh style. Deviate from an existing pattern only when the task explicitly requires it, and say so when you do. On a genuinely greenfield project with no example to copy, follow plan.md and the constitution instead.
+   - **Supabase grants are manual**: `supabase/*_grants.sql` cannot be applied via `SupabaseService` REST (`service_role` over HTTP gives `42501`). Treat the Apply task as manual: Dashboard SQL Editor or `npx supabase db execute --file supabase/..._grants.sql --linked` / `psql "$DATABASE_URL" -f ...` (see `.pandawa/templates/supabase-README.md` — copy to `supabase/README.md` in the target project if Supabase is used). Split tasks: `T00x Apply grants (manual)` vs `T00y Verify via tinker/SELECT`.
 
 8. **Phase verification gate** (run after EVERY phase, before moving on — this prevents error chains):
-   - Run the project's cheapest available checks in this order: type check / compile (e.g., `tsc --noEmit`, `mvn compile`), then lint, then build, then the tests relevant to the phase.
+   - Run the project's cheapest available checks in this order: type check / compile (e.g., `tsc --noEmit`, `mvn compile`), then lint/formatter (for Laravel: run `pint` **fix first**, then `pint --test` — `pint --test` fails on `new_with_parentheses, fully_qualified_strict_types` after generation, so auto-fix before gate; do not treat the first `pint --test` failure as a gate failure without trying `pint`), then build, then the tests relevant to the phase.
    - **Keep gate output compact** (token thrift): this gate runs after every phase, so do NOT paste full build/lint/test logs into the run. Collapse passing/framework noise to counts; keep verbatim only the failing messages, assertions, and stack traces needed to diagnose and fix (same output-compression rule as `/pandawa.test`).
    - **Self-fix loop**: if a check fails, fix the error and re-run — up to 3 attempts per distinct error. Actually fix errors; never just report a recommendation and move on. If an error survives 3 attempts, record it in implementation-log.md as UNRESOLVED with your best diagnosis and continue only if later phases don't depend on it; otherwise stop and report.
    - **Source-conformance check** (the "matches the PDF" gate — run whenever a phase touches an entity, migration, DTO, contract, or FE type): compare the generated artifacts back to the source resource model via the digest under `FEATURE_DIR/inputs/` and `data-model.md`'s conformance checklist. Verify: every resource → table, every sub-resource → child table, every attribute → column (exact name/type/cardinality), every enum/state type present with exactly the source's values kept per resource — **nothing missing, renamed, invented, or simplified**. Any merge/flatten must be a deviation explicitly recorded in `data-model.md` and backed by a lossless mapper; an **unrecorded deviation is a gate failure**. This is cheap (compare against the text digest, not the raw PDF) and catches drift early, before it compounds into a rebuild.
