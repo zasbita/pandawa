@@ -184,18 +184,21 @@ generate_branch_name() {
     # Common stop words to filter out
     local stop_words="^(i|a|an|the|to|for|of|in|on|at|by|with|from|is|are|was|were|be|been|being|have|has|had|do|does|did|will|would|should|could|can|may|might|must|shall|this|that|these|those|my|your|our|their|want|need|add|get|set)$"
     
-    # Convert to lowercase and split into words
-    local clean_name=$(echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/ /g')
+    # Convert to lowercase and split into words; keep hyphen/digit combos like H-1, 24h intact
+    local clean_name=$(echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 -]/ /g')
     
-    # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
+    # Filter words: remove stop words and words shorter than 3 chars (unless they contain digit/hyphen or are uppercase acronyms)
     local meaningful_words=()
     for word in $clean_name; do
         # Skip empty words
         [ -z "$word" ] && continue
         
-        # Keep words that are NOT stop words AND (length >= 3 OR are potential acronyms)
+        # Keep words that are NOT stop words AND (length >= 3 OR contain digit/hyphen OR are potential acronyms)
         if ! echo "$word" | grep -qiE "$stop_words"; then
             if [ ${#word} -ge 3 ]; then
+                meaningful_words+=("$word")
+            elif echo "$word" | grep -qE '[-0-9]'; then
+                # Keep short tokens that contain digit or hyphen (e.g., h-1, 24h)
                 meaningful_words+=("$word")
             elif echo "$description" | grep -q "\b$(printf '%s' "$word" | tr '[:lower:]' '[:upper:]')\b"; then
                 # Keep short words if they appear as uppercase in original (likely acronyms)

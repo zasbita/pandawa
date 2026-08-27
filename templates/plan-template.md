@@ -70,7 +70,9 @@ specs/[###-feature]/
   ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
   for this feature. Delete unused options and expand the chosen structure with
   real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
+  not include Option labels. `scripts/bash/setup-plan.sh` and `scripts/powershell/setup-plan.ps1`
+  auto-detect Laravel monolith (composer.json + artisan) and prune the generic
+  Option 1/2/3 placeholder — re-run setup-plan if the repo was just scaffolded.
 -->
 
 ```text

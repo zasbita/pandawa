@@ -59,7 +59,15 @@ EXAMPLES:
 # Get feature paths and validate branch
 $paths = Get-FeaturePathsEnv
 
-if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GIT)) { 
+if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GIT)) {
+    if ($Json) {
+        $esc = { param($s) '"' + ((([string]$s) -replace '\\', '\\') -replace '"', '\"') + '"' }
+        $branchJson = & $esc $paths.CURRENT_BRANCH
+        $dirJson = & $esc $paths.FEATURE_DIR
+        $nextStep = '.pandawa/scripts/powershell/create-new-feature.ps1 -FeatureDescription ''<feature description>''  # e.g., ''simpan jadwal H-1 pertandingan mendatang'''
+        $nextJson = & $esc $nextStep
+        Write-Output ('{"ERROR":"Not on a feature branch. Current branch: ' + $paths.CURRENT_BRANCH.Replace('"','\"') + '","BRANCH":' + $branchJson + ',"FEATURE_DIR":' + $dirJson + ',"NEXT_STEP":' + $nextJson + ',"AVAILABLE_DOCS":[]}')
+    }
     exit 1 
 }
 
@@ -87,21 +95,46 @@ if ($PathsOnly) {
 
 # Validate required directories and files
 if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
-    Write-Output "ERROR: Feature directory not found: $($paths.FEATURE_DIR)"
-    Write-Output "Run /pandawa.specify first to create the feature structure."
+    if ($Json) {
+        $esc = { param($s) '"' + ((([string]$s) -replace '\\', '\\') -replace '"', '\"') + '"' }
+        $dirJson = & $esc $paths.FEATURE_DIR
+        $branchJson = & $esc $paths.CURRENT_BRANCH
+        $nextJson = & $esc ".pandawa/scripts/powershell/create-new-feature.ps1 -FeatureDescription '<feature description>'"
+        Write-Output ('{"ERROR":"Feature directory not found: ' + $paths.FEATURE_DIR.Replace('\','\\').Replace('"','\"') + '","BRANCH":' + $branchJson + ',"FEATURE_DIR":' + $dirJson + ',"NEXT_STEP":' + $nextJson + ',"AVAILABLE_DOCS":[]}')
+    } else {
+        Write-Output "ERROR: Feature directory not found: $($paths.FEATURE_DIR)"
+        Write-Output "Run /pandawa.specify first to create the feature structure."
+        Write-Output "NEXT_STEP: .pandawa/scripts/powershell/create-new-feature.ps1 -FeatureDescription '<feature description>'"
+    }
     exit 1
 }
 
 if (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
-    Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /pandawa.plan first to create the implementation plan."
+    if ($Json) {
+        $esc = { param($s) '"' + ((([string]$s) -replace '\\', '\\') -replace '"', '\"') + '"' }
+        $dirJson = & $esc $paths.FEATURE_DIR
+        $branchJson = & $esc $paths.CURRENT_BRANCH
+        $nextJson = & $esc ".pandawa/scripts/powershell/setup-plan.ps1  # then /pandawa.plan"
+        Write-Output ('{"ERROR":"plan.md not found in ' + $paths.FEATURE_DIR.Replace('\','\\').Replace('"','\"') + '","BRANCH":' + $branchJson + ',"FEATURE_DIR":' + $dirJson + ',"NEXT_STEP":' + $nextJson + ',"AVAILABLE_DOCS":[]}')
+    } else {
+        Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
+        Write-Output "Run /pandawa.plan first to create the implementation plan."
+    }
     exit 1
 }
 
 # Check for tasks.md if required
 if ($RequireTasks -and -not (Test-Path $paths.TASKS -PathType Leaf)) {
-    Write-Output "ERROR: tasks.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /pandawa.tasks first to create the task list."
+    if ($Json) {
+        $esc = { param($s) '"' + ((([string]$s) -replace '\\', '\\') -replace '"', '\"') + '"' }
+        $dirJson = & $esc $paths.FEATURE_DIR
+        $branchJson = & $esc $paths.CURRENT_BRANCH
+        $nextJson = & $esc "update $paths/FEATURE_DIR/tasks.md via /pandawa.tasks"
+        Write-Output ('{"ERROR":"tasks.md not found in ' + $paths.FEATURE_DIR.Replace('\','\\').Replace('"','\"') + '","BRANCH":' + $branchJson + ',"FEATURE_DIR":' + $dirJson + ',"NEXT_STEP":' + $nextJson + ',"AVAILABLE_DOCS":[]}')
+    } else {
+        Write-Output "ERROR: tasks.md not found in $($paths.FEATURE_DIR)"
+        Write-Output "Run /pandawa.tasks first to create the task list."
+    }
     exit 1
 }
 
@@ -133,7 +166,17 @@ if ($Json) {
     # Windows paths are escaped.
     $escJson = { param($s) '"' + ((([string]$s) -replace '\\', '\\') -replace '"', '\"') + '"' }
     $docsJson = '[' + (($docs | ForEach-Object { & $escJson $_ }) -join ',') + ']'
-    Write-Output ('{"FEATURE_DIR":' + (& $escJson $paths.FEATURE_DIR) + ',"AVAILABLE_DOCS":' + $docsJson + '}')
+    $branchJson = & $escJson $paths.CURRENT_BRANCH
+    $featureSpecExists = (Test-Path $paths.FEATURE_SPEC -PathType Leaf).ToString().ToLower()
+    $implPlanExists = (Test-Path $paths.IMPL_PLAN -PathType Leaf).ToString().ToLower()
+    $tasksExists = (Test-Path $paths.TASKS -PathType Leaf).ToString().ToLower()
+    $taskCount = 0
+    if (Test-Path $paths.TASKS -PathType Leaf) {
+        try { $taskCount = (Select-String -Path $paths.TASKS -Pattern '^\s*-\s*\[[ xX]\]\s*T\d+' -AllMatches).Matches.Count } catch { $taskCount = 0 }
+    }
+    # Phase detection: implement > tasks > plan > spec
+    $phase = if ($tasksExists -eq 'true') { 'tasks' } elseif ($implPlanExists -eq 'true') { 'plan' } else { 'spec' }
+    Write-Output ('{"FEATURE_DIR":' + (& $escJson $paths.FEATURE_DIR) + ',"BRANCH":' + $branchJson + ',"AVAILABLE_DOCS":' + $docsJson + ',"FEATURE_SPEC_EXISTS":' + $featureSpecExists + ',"IMPL_PLAN_EXISTS":' + $implPlanExists + ',"TASKS_EXISTS":' + $tasksExists + ',"TASK_COUNT":' + $taskCount + ',"PHASE":"' + $phase + '"}')
 } else {
     # Text output
     Write-Output "FEATURE_DIR:$($paths.FEATURE_DIR)"

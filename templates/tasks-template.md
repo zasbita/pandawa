@@ -21,6 +21,8 @@ description: "Task list template for feature implementation"
 - **[FR-###]**: Which functional requirement(s) this task satisfies, e.g. `[US1][FR-003]` (a task may cite several). Every `FR-###` in spec.md MUST appear on at least one task so `/pandawa.analyze` can verify coverage by ID. Only purely structural setup/scaffolding/config tasks that don't implement a specific FR omit it — a foundational task that implements a cross-cutting FR (auth, audit-logging) still cites it.
 - Include exact file paths in descriptions
 
+> **GitHub Issues (grouping)**: Do NOT create one issue per T00x — too noisy. Group into 3–5 issues per Bolt: Foundational, US1, US2, US3, Polish. Use `scripts/powershell/create-issues-from-tasks.ps1` (or `scripts/bash/create-issues-from-tasks.sh`) which parses `tasks.md` via `--body-file` temp files (fixes Windows `gh issue create --body "multi line"` quoting), dedupes via `gh issue list`, and throttles. Example: `create-issues-from-tasks.ps1 -GroupBy story -DryRun` then without `-DryRun`. The checklist format below (`- [ ] T001 [US1] ...`) is machine-parseable — keep `[ID] [P?]` prefix and add `[USx] [FR-xxx]` on every functional task so the script and `/pandawa.analyze` can filter by story/FR.
+
 ## Runtime Status
 
 Keep task state in the checkbox and, when work starts, append a status marker:

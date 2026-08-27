@@ -41,6 +41,51 @@ TEMPLATE="$REPO_ROOT/.pandawa/templates/plan-template.md"
 if [[ -f "$TEMPLATE" ]]; then
     cp "$TEMPLATE" "$IMPL_PLAN"
     echo "Copied plan template to $IMPL_PLAN"
+    # Auto-prune generic Option 1/2/3 placeholder for known project types (e.g., Laravel monolith)
+    if [[ -f "$REPO_ROOT/composer.json" && -f "$REPO_ROOT/artisan" ]] && grep -qi laravel "$REPO_ROOT/composer.json" 2>/dev/null; then
+        if grep -q "# \[REMOVE IF UNUSED\] Option 1" "$IMPL_PLAN" 2>/dev/null; then
+            # Replace the fenced block containing Option 1/2/3 with Laravel structure (portable via python if available, else sed)
+            if command -v python3 >/dev/null 2>&1; then
+                python3 - "$IMPL_PLAN" << 'PY'
+import re, pathlib, sys
+p = pathlib.Path(sys.argv[1])
+text = p.read_text(encoding="utf-8")
+laravel = """```text
+# Laravel monolith (detected: composer.json + artisan)
+app/
+├── Http/Controllers/
+├── Models/
+├── Services/
+└── Console/Commands/
+
+resources/
+├── views/
+└── js/  # or frontend via Vite
+
+database/
+├── migrations/
+└── seeders/
+
+routes/
+├── web.php
+├── api.php
+└── console.php
+
+tests/
+├── Feature/
+└── Unit/
+```"""
+pattern = r'```text\s*\n# \[REMOVE IF UNUSED\] Option 1:[\s\S]*?ios/ or android/[\s\S]*?\[platform-specific structure[^\n]*\]\s*\n```'
+new, n = re.subn(pattern, laravel, text)
+if n:
+    p.write_text(new, encoding="utf-8")
+    print("[pandawa] Detected Laravel monolith — pruned generic Option 1/2/3 template")
+PY
+            else
+                echo "[pandawa] Detected Laravel but python3 not available — skipping prune"
+            fi
+        fi
+    fi
 else
     echo "Warning: Plan template not found at $TEMPLATE"
     # Create a basic plan file if template doesn't exist

@@ -36,6 +36,50 @@ $template = Join-Path $paths.REPO_ROOT '.pandawa/templates/plan-template.md'
 if (Test-Path $template) { 
     Copy-Item $template $paths.IMPL_PLAN -Force
     Write-Output "Copied plan template to $($paths.IMPL_PLAN)"
+    # Auto-prune generic Option 1/2/3 placeholder for known project types (e.g., Laravel monolith)
+    try {
+        $composer = Join-Path $paths.REPO_ROOT 'composer.json'
+        $isLaravel = (Test-Path $composer) -and (Test-Path (Join-Path $paths.REPO_ROOT 'artisan')) -and ((Get-Content $composer -Raw -ErrorAction SilentlyContinue) -match 'laravel')
+        if ($isLaravel) {
+            $planContent = Get-Content $paths.IMPL_PLAN -Raw -ErrorAction SilentlyContinue
+            if ($planContent -and $planContent.Contains('# [REMOVE IF UNUSED] Option 1')) {
+                $laravelStructure = @"
+``````text
+# Laravel monolith (detected: composer.json + artisan)
+app/
+├── Http/Controllers/
+├── Models/
+├── Services/
+└── Console/Commands/
+
+resources/
+├── views/
+└── js/  # or frontend via Vite
+
+database/
+├── migrations/
+└── seeders/
+
+routes/
+├── web.php
+├── api.php
+└── console.php
+
+tests/
+├── Feature/
+└── Unit/
+``````
+"@
+                # Replace the entire fenced block containing Option 1/2/3 with concrete structure
+                $pattern = '```text\s*\r?\n# \[REMOVE IF UNUSED\] Option 1:[\s\S]*?ios/ or android/[\s\S]*?\[platform-specific structure[^\n]*\]\s*\r?\n```'
+                $newContent = [regex]::Replace($planContent, $pattern, $laravelStructure)
+                if ($newContent -ne $planContent) {
+                    Set-Content -Path $paths.IMPL_PLAN -Value $newContent -Encoding utf8
+                    Write-Output "[pandawa] Detected Laravel monolith — pruned generic Option 1/2/3 template"
+                }
+            }
+        }
+    } catch { Write-Verbose "setup-plan prune skipped: $_" }
 } else {
     Write-Warning "Plan template not found at $template"
     # Create a basic plan file if template doesn't exist

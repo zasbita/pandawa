@@ -334,12 +334,10 @@ DEFAULT_GITHUB_API = "https://api.github.com"
 # Pandawa private plugin marketplace (skills/agents are distributed via Claude Code
 # /plugin, NOT bundled into the template). PANDAWA only POINTS to the marketplace by
 # writing .claude/settings.json — it never copies plugin content.
-# Note: template host migrated to GitHub (zasbita/pandawa releases), but marketplace
-# still supports both GitHub and GitLab raw URLs (see _marketplace_raw_file_url).
+# Template and marketplace fully migrated to GitHub (no git.neuron.id dependency).
+# Local rudis clone at C:\work\ristek\rudis can be used via --profile-path for offline.
 MARKETPLACE_NAME = "pandawa"
 DEFAULT_MARKETPLACE_URL = "https://github.com/zasbita/pandawa-marketplace-tooling.git"
-# Fallback for private GitLab internal installs (env override PANDAWA_MARKETPLACE_URL still works)
-GITLAB_MARKETPLACE_URL = "https://git.neuron.id/research/pandawa-marketplace-tooling.git"
 MARKETPLACE_BASELINE_PLUGINS = ["pandawa-core"]
 
 # Governance plugins are mutually exclusive at runtime: at most ONE may be enabled per
@@ -1512,7 +1510,7 @@ def fetch_marketplace_plugins(url: str, *, cli_token: "str | None" = None,
 
     `category` defaults to 'skill' when absent. Returns None on any failure (bad URL,
     network, auth, non-200, parse) so callers can fall back to cached/offline data.
-    Tries GitHub first, fallback to GitLab if primary is GitHub and fails.
+    GitHub-only (no git.neuron.id fallback) — local rudis at C:\work\ristek\rudis usable via --profile-path.
     """
     def _fetch_one(u: str):
         api_url = _marketplace_raw_file_url(u, ref=ref)
@@ -1521,7 +1519,6 @@ def fetch_marketplace_plugins(url: str, *, cli_token: "str | None" = None,
         http = client or _get_client()
         if http is None:
             return None
-        # choose headers by host
         if "github.com" in (u or "") or "raw.githubusercontent.com" in api_url:
             gh_token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
             headers = {"Accept": "application/vnd.github.v3+json"}
@@ -1545,9 +1542,6 @@ def fetch_marketplace_plugins(url: str, *, cli_token: "str | None" = None,
         return (data.get("name") or MARKETPLACE_NAME, catalog)
 
     result = _fetch_one(url)
-    # fallback: if GitHub default fails, try GitLab marketplace (internal)
-    if result is None and url and "github.com" in url and GITLAB_MARKETPLACE_URL and GITLAB_MARKETPLACE_URL != url:
-        result = _fetch_one(GITLAB_MARKETPLACE_URL)
     if result is None:
         return None
     return result

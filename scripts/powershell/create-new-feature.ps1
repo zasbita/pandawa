@@ -1,12 +1,12 @@
 #!/usr/bin/env pwsh
 # Create a new feature
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding=$false)]
 param(
     [switch]$Json,
-    [string]$ShortName,
-    [int]$Number = 0,
+    [Parameter(Mandatory=$false)][string]$ShortName,
+    [Parameter(Mandatory=$false)][int]$Number = 0,
     [switch]$Help,
-    [Parameter(ValueFromRemainingArguments = $true)]
+    [Parameter(Position=0, ValueFromRemainingArguments = $true)]
     [string[]]$FeatureDescription
 )
 $ErrorActionPreference = 'Stop'
@@ -14,16 +14,20 @@ $ErrorActionPreference = 'Stop'
 # Show help if requested
 if ($Help) {
     Write-Host "Usage: ./create-new-feature.ps1 [-Json] [-ShortName <name>] [-Number N] <feature description>"
+    Write-Host "       ./create-new-feature.ps1 [-Json] -FeatureDescription <text> [-ShortName <name>] [-Number N]"
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Json               Output in JSON format"
     Write-Host "  -ShortName <name>   Provide a custom short name (2-4 words) for the branch"
     Write-Host "  -Number N           Specify branch number manually (overrides auto-detection)"
+    Write-Host "  -FeatureDescription Explicit named parameter for feature description (use if description looks like a number)"
     Write-Host "  -Help               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  ./create-new-feature.ps1 'Add user authentication system' -ShortName 'user-auth'"
     Write-Host "  ./create-new-feature.ps1 'Implement OAuth2 integration for API'"
+    Write-Host "  ./create-new-feature.ps1 -FeatureDescription 'simpan jadwal H-1 pertandingan mendatang' -ShortName 'jadwal-h-1'"
+    Write-Host "  ./create-new-feature.ps1 -Json -FeatureDescription 'my feature'  # JSON output, named param avoids Number binding bug"
     exit 0
 }
 
@@ -165,18 +169,19 @@ function Get-BranchName {
         'want', 'need', 'add', 'get', 'set'
     )
     
-    # Convert to lowercase and extract words (alphanumeric only)
-    $cleanName = $Description.ToLower() -replace '[^a-z0-9\s]', ' '
+    # Convert to lowercase and extract words; keep hyphen/digit combos like H-1, 24h intact
+    $cleanName = $Description.ToLower() -replace '[^a-z0-9\s-]', ' '
+    # Split on whitespace, but keep hyphenated tokens like h-1 as one word
     $words = $cleanName -split '\s+' | Where-Object { $_ }
     
-    # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
+    # Filter words: remove stop words and words shorter than 3 chars (unless they contain digit/hyphen or are uppercase acronyms in original)
     $meaningfulWords = @()
     foreach ($word in $words) {
-        # Skip stop words
+        # Skip stop words (exact match, hyphens are not stop words so h-1 passes)
         if ($stopWords -contains $word) { continue }
         
-        # Keep words that are length >= 3 OR appear as uppercase in original (likely acronyms)
-        if ($word.Length -ge 3) {
+        # Keep words that are length >= 3 OR contain digit/hyphen OR appear as uppercase in original (likely acronyms)
+        if ($word.Length -ge 3 -or $word -match '[\d-]') {
             $meaningfulWords += $word
         } elseif ($Description -match "\b$($word.ToUpper())\b") {
             # Keep short words if they appear as uppercase in original (likely acronyms)

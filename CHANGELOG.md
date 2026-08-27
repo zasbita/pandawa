@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-08-27
+
+### Fixed
+
+- **create-new-feature param binding (P0)**: PowerShell `PositionalBinding=$false` + `FeatureDescription` `Position=0 ValueFromRemainingArguments` only; `ShortName`/`Number` named-only. Fix `Cannot convert "simpan" to Int32` when using `-ShortName 'jadwal-h-1' 'simpan jadwal H-1...'` and document `-FeatureDescription` in help (`scripts/powershell/create-new-feature.ps1:3`, `scripts/bash/create-new-feature.sh` parity).
+- **Branch name truncation (P0)**: `Get-BranchName`/`generate_branch_name` keep hyphen/digit combos (`H-1`, `24h`) via `[^a-z0-9\s-]` + `[\d-]` keeper. `'simpan jadwal H-1 pertandingan mendatang'` now `simpan-jadwal-h-1` not `simpan-jadwal-h`.
+
+### Changed
+
+- **check-prerequisites actionable JSON (P1)**: `main`/missing `FEATURE_DIR`/`plan.md`/`tasks.md` emit `{ERROR,BRANCH,FEATURE_DIR,NEXT_STEP}` in `-Json` mode with copy-paste `create-new-feature -FeatureDescription` (PowerShell) / `--short-name` (bash); success JSON adds `FEATURE_SPEC_EXISTS/IMPL_PLAN_EXISTS/TASKS_EXISTS/TASK_COUNT/PHASE` for phase auto-detect without `-PathsOnly` (`scripts/powershell/check-prerequisites.ps1:60`, `scripts/bash/check-prerequisites.sh:82`).
+- **Windows issue automation (P1)**: New `scripts/powershell/create-issues-from-tasks.ps1` + `scripts/bash/create-issues-from-tasks.sh` parse `tasks.md` `[ID][P?][USx][FR-xxx]`, `--body-file` temp file (fix PowerShell `gh issue create --body "multi line"` quoting), dedupe via `gh issue list`, throttle 0.5s, `-GroupBy story|phase` default `story` (3-5 issues Foundational/US1/US2/Polish not per T00x), `--DryRun`/`--Json`.
+- **tasks-template grouping hint (P1)**: Document 3-5 Bolt grouping and script usage, keep strict `[ID][P?][USx][FR-xxx]` for `create-issues-from-tasks` + `/pandawa.analyze` (`templates/tasks-template.md:17`).
+- **plan-template prune (P2)**: `setup-plan.ps1`/`setup-plan.sh` auto-detect Laravel (`composer.json`+`artisan`+`laravel`) and replace generic `Option 1/2/3` placeholder with concrete monolith tree (`templates/plan-template.md:76`).
+- **Marketplace GitHub-only**: Remove `git.neuron.id` fallback (`GITLAB_MARKETPLACE_URL`) — template + marketplace fully on `github.com/zasbita/pandawa*`, local `rudis` via `--profile-path` (`src/pandawa_cli/__init__.py:334`).
+
 ## [0.32.0] - 2026-08-25
 
 ### Changed

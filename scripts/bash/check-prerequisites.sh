@@ -80,7 +80,13 @@ source "$SCRIPT_DIR/common.sh"
 
 # Get feature paths and validate branch
 eval $(get_feature_paths)
-check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1
+if ! check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT"; then
+    if $JSON_MODE; then
+        printf '{"ERROR":"Not on a feature branch. Current branch: %s","BRANCH":"%s","FEATURE_DIR":"%s","NEXT_STEP":"%s","AVAILABLE_DOCS":[]}\n' \
+            "$(json_escape "$CURRENT_BRANCH")" "$(json_escape "$CURRENT_BRANCH")" "$(json_escape "$FEATURE_DIR")" "$(json_escape "./scripts/bash/create-new-feature.sh --short-name '<name>' '<feature description>'")"
+    fi
+    exit 1
+fi
 
 # If paths-only mode, output paths and exit (support JSON + paths-only combined)
 if $PATHS_ONLY; then
@@ -101,21 +107,37 @@ fi
 
 # Validate required directories and files
 if [[ ! -d "$FEATURE_DIR" ]]; then
-    echo "ERROR: Feature directory not found: $FEATURE_DIR" >&2
-    echo "Run /pandawa.specify first to create the feature structure." >&2
+    if $JSON_MODE; then
+        printf '{"ERROR":"Feature directory not found: %s","BRANCH":"%s","FEATURE_DIR":"%s","NEXT_STEP":"%s","AVAILABLE_DOCS":[]}\n' \
+            "$(json_escape "$FEATURE_DIR")" "$(json_escape "$CURRENT_BRANCH")" "$(json_escape "$FEATURE_DIR")" "$(json_escape "./scripts/bash/create-new-feature.sh '<feature description>'")"
+    else
+        echo "ERROR: Feature directory not found: $FEATURE_DIR" >&2
+        echo "Run /pandawa.specify first to create the feature structure." >&2
+        echo "NEXT_STEP: ./scripts/bash/create-new-feature.sh '<feature description>'" >&2
+    fi
     exit 1
 fi
 
 if [[ ! -f "$IMPL_PLAN" ]]; then
-    echo "ERROR: plan.md not found in $FEATURE_DIR" >&2
-    echo "Run /pandawa.plan first to create the implementation plan." >&2
+    if $JSON_MODE; then
+        printf '{"ERROR":"plan.md not found in %s","BRANCH":"%s","FEATURE_DIR":"%s","NEXT_STEP":"%s","AVAILABLE_DOCS":[]}\n' \
+            "$(json_escape "$FEATURE_DIR")" "$(json_escape "$CURRENT_BRANCH")" "$(json_escape "$FEATURE_DIR")" "$(json_escape "./scripts/bash/setup-plan.sh  # then /pandawa.plan")"
+    else
+        echo "ERROR: plan.md not found in $FEATURE_DIR" >&2
+        echo "Run /pandawa.plan first to create the implementation plan." >&2
+    fi
     exit 1
 fi
 
 # Check for tasks.md if required
 if $REQUIRE_TASKS && [[ ! -f "$TASKS" ]]; then
-    echo "ERROR: tasks.md not found in $FEATURE_DIR" >&2
-    echo "Run /pandawa.tasks first to create the task list." >&2
+    if $JSON_MODE; then
+        printf '{"ERROR":"tasks.md not found in %s","BRANCH":"%s","FEATURE_DIR":"%s","NEXT_STEP":"%s","AVAILABLE_DOCS":[]}\n' \
+            "$(json_escape "$FEATURE_DIR")" "$(json_escape "$CURRENT_BRANCH")" "$(json_escape "$FEATURE_DIR")" "$(json_escape "update $TASKS via /pandawa.tasks")"
+    else
+        echo "ERROR: tasks.md not found in $FEATURE_DIR" >&2
+        echo "Run /pandawa.tasks first to create the task list." >&2
+    fi
     exit 1
 fi
 
@@ -147,8 +169,18 @@ if $JSON_MODE; then
         json_docs=$(printf '"%s",' "${docs[@]}")
         json_docs="[${json_docs%,}]"
     fi
-    
-    printf '{"FEATURE_DIR":"%s","AVAILABLE_DOCS":%s}\n' "$(json_escape "$FEATURE_DIR")" "$json_docs"
+    # Additional phase/task info for agent auto-detection
+    feature_spec_exists="false"; [[ -f "$FEATURE_SPEC" ]] && feature_spec_exists="true"
+    impl_plan_exists="false"; [[ -f "$IMPL_PLAN" ]] && impl_plan_exists="true"
+    tasks_exists="false"; [[ -f "$TASKS" ]] && tasks_exists="true"
+    task_count=0
+    if [[ -f "$TASKS" ]]; then
+        task_count=$(grep -cE '^[[:space:]]*-[[:space:]]*\[[ xX]\][[:space:]]*T[0-9]+' "$TASKS" 2>/dev/null || echo 0)
+        task_count=$(echo "$task_count" | tr -d '[:space:]')
+    fi
+    if $tasks_exists; then phase="tasks"; elif $impl_plan_exists; then phase="plan"; else phase="spec"; fi
+    printf '{"FEATURE_DIR":"%s","BRANCH":"%s","AVAILABLE_DOCS":%s,"FEATURE_SPEC_EXISTS":%s,"IMPL_PLAN_EXISTS":%s,"TASKS_EXISTS":%s,"TASK_COUNT":%s,"PHASE":"%s"}\n' \
+        "$(json_escape "$FEATURE_DIR")" "$(json_escape "$CURRENT_BRANCH")" "$json_docs" "$feature_spec_exists" "$impl_plan_exists" "$tasks_exists" "$task_count" "$phase"
 else
     # Text output
     echo "FEATURE_DIR:$FEATURE_DIR"
