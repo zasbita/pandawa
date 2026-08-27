@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-08-27
+
+### Added
+
+- **pandawa qa**: New top-level `pandawa qa [--url URL] [--browser chromium|firefox|webkit] [--quick|--full] [--json] [--output report.md]` — HTTP + optional Playwright browser audit, health 0-100 rubric (console 15 + links 10 + 6 categories 75), auto-detect `localhost:3000/5173/8000/8080/5000`, link checker (cap 30), placeholder/slow detection, markdown/JSON report (`src/pandawa_cli/__init__.py:3238`).
+- **Auto QA on implement**: `pandawa run implement --qa/--no-qa --qa-url --qa-browser` (default `--qa`) runs QA audit after `/pandawa.implement` and prints health verdict; skip with `--no-qa` (`src/pandawa_cli/__init__.py:5008`).
+
 ## [0.33.0] - 2026-08-27
 
 ### Fixed

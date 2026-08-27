@@ -3235,6 +3235,216 @@ def version(
     console.print(panel)
     console.print()
 
+
+# ---- `pandawa qa` command -----------------------------------------------------------------
+def _qa_probe(url: str, timeout: float = 2.0) -> bool:
+    try:
+        r = _get_client().get(url, timeout=timeout, follow_redirects=True)
+        return r.status_code < 500
+    except Exception:
+        return False
+
+
+def _qa_detect_url(explicit: str | None) -> tuple[str | None, str]:
+    if explicit:
+        return explicit, "explicit --url"
+    # common dev ports
+    candidates = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:8080",
+        "http://localhost:5000",
+        "http://127.0.0.1:3000",
+    ]
+    for c in candidates:
+        if _qa_probe(c):
+            return c, "auto-detected"
+    return None, "no server"
+
+
+def _qa_extract_links(html: str, base: str) -> list[str]:
+    import re
+    hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, re.I)
+    links = []
+    for h in hrefs:
+        if h.startswith("#") or h.startswith("mailto:") or h.startswith("tel:") or h.startswith("javascript:"):
+            continue
+        if h.startswith("http://") or h.startswith("https://"):
+            links.append(h)
+        elif h.startswith("/"):
+            # same origin
+            from urllib.parse import urljoin
+            links.append(urljoin(base, h))
+    # dedupe preserve order
+    seen = set()
+    out = []
+    for u in links:
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out[:30]  # cap
+
+
+def _qa_run(url: str | None, browser: str | None, quick: bool, timeout: float = 8.0) -> dict:
+    findings: list[dict] = []
+    pages_tested: list[str] = []
+    links_ok = links_fail = 0
+    console_errors = 0
+    t0 = datetime.now(timezone.utc)
+    http_ok = True
+
+    if not url:
+        findings.append({"severity": "HIGH", "msg": "No running app detected. Start dev server (npm run dev / php artisan serve) then `pandawa qa --url http://localhost:3000`", "where": "setup"})
+        return {"health": 45, "verdict": "not ready", "pages_tested": [], "findings": findings, "links_ok": 0, "links_fail": 0, "console_errors": 0, "elapsed": 0.0}
+
+    # fetch main page
+    try:
+        r = _get_client().get(url, timeout=timeout, follow_redirects=True)
+        pages_tested.append(url)
+        if r.status_code >= 400:
+            http_ok = False
+            findings.append({"severity": "CRITICAL", "msg": f"GET {url} -> {r.status_code}", "where": url})
+        else:
+            html = r.text or ""
+            # content checks
+            if "lorem ipsum" in html.lower() or "todo" in html.lower() and "TODO" in html:
+                findings.append({"severity": "LOW", "msg": "Placeholder text (Lorem/TODO) found", "where": url})
+            # links
+            links = _qa_extract_links(html, url)
+            for lk in links:
+                try:
+                    lr = _get_client().get(lk, timeout=4.0, follow_redirects=True)
+                    if lr.status_code >= 400:
+                        links_fail += 1
+                        findings.append({"severity": "HIGH", "msg": f"Broken link {lk} -> {lr.status_code}", "where": url})
+                    else:
+                        links_ok += 1
+                except Exception as e:
+                    links_fail += 1
+                    findings.append({"severity": "HIGH", "msg": f"Link error {lk}: {e}", "where": url})
+                if quick and len(findings) >= 3:
+                    break
+            # perf
+            elapsed = (datetime.now(timezone.utc) - t0).total_seconds()
+            if elapsed > 2.0:
+                findings.append({"severity": "MEDIUM", "msg": f"Slow response {elapsed:.1f}s >2s", "where": url})
+    except Exception as e:
+        http_ok = False
+        findings.append({"severity": "CRITICAL", "msg": f"Fetch failed {url}: {e}", "where": url})
+
+    # optional playwright browser check
+    if browser:
+        try:
+            from playwright.sync_api import sync_playwright  # type: ignore
+            with sync_playwright() as p:
+                bw = getattr(p, browser) if hasattr(p, browser) else p.chromium
+                b = bw.launch(headless=True)
+                pg = b.new_page()
+                errs: list[str] = []
+                pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+                pg.on("pageerror", lambda e: errs.append(str(e)))
+                pg.goto(url, timeout=int(timeout * 1000))
+                pg.wait_for_timeout(1500)
+                b.close()
+                console_errors = len(errs)
+                for e in errs[:5]:
+                    findings.append({"severity": "HIGH", "msg": f"Console error: {e[:200]}", "where": url})
+        except ImportError:
+            findings.append({"severity": "LOW", "msg": "playwright not installed (`pip install playwright && playwright install`)", "where": "browser"})
+        except Exception as e:
+            findings.append({"severity": "MEDIUM", "msg": f"Browser check failed: {e}", "where": url})
+
+    # health rubric: console 15 + links 10 + 6 cat 75
+    health = 100
+    if console_errors:
+        health -= 15
+    elif any(f["severity"] == "HIGH" and "Console" in f["msg"] for f in findings):
+        health -= 10
+    if links_fail:
+        # links weight 10
+        total_links = max(1, links_ok + links_fail)
+        health -= int(10 * (links_fail / total_links))
+    if not http_ok:
+        health -= 25
+    # deduct per finding severity
+    for f in findings:
+        if f["severity"] == "CRITICAL":
+            health -= 12
+        elif f["severity"] == "HIGH":
+            health -= 6
+        elif f["severity"] == "MEDIUM":
+            health -= 3
+        elif f["severity"] == "LOW":
+            health -= 1
+    health = max(0, min(100, health))
+    if health >= 90:
+        verdict = "ship-ready"
+    elif health >= 70:
+        verdict = "minor fixes"
+    elif health >= 50:
+        verdict = "not ready"
+    else:
+        verdict = "broken"
+    elapsed = (datetime.now(timezone.utc) - t0).total_seconds()
+    return {"health": health, "verdict": verdict, "pages_tested": pages_tested, "findings": findings, "links_ok": links_ok, "links_fail": links_fail, "console_errors": console_errors, "elapsed": elapsed}
+
+
+@app.command()
+def qa(
+    url: str = typer.Option(None, "--url", help="App URL to test (default auto-detect localhost:3000/5173/8000)"),
+    browser: str = typer.Option(None, "--browser", help="Playwright browser: chromium/firefox/webkit (needs `playwright` package)"),
+    headed: bool = typer.Option(False, "--headed", help="Run browser headed (not yet, reserved)"),
+    output: str = typer.Option(None, "--output", help="Write markdown report to file"),
+    json_output: bool = typer.Option(False, "--json", help="Output JSON instead of pretty report"),
+    quick: bool = typer.Option(False, "--quick", help="Quick mode - critical/high only"),
+    full: bool = typer.Option(False, "--full", help="Full mode - scan more links"),
+):
+    """Run QA audit — HTTP + optional Playwright browser. Auto-detects localhost if --url omitted."""
+    _timer = ProcessTimer("pandawa qa")
+    target, how = _qa_detect_url(url)
+    if headed and not browser:
+        browser = "chromium"
+    result = _qa_run(target, browser, quick=quick, timeout=10.0 if full else 8.0)
+
+    if json_output:
+        # Use manual json to avoid rich
+        import json as _j
+        payload = {"url": target, "detected_via": how, **result}
+        console.print(_j.dumps(payload, indent=2))
+    else:
+        # pretty report
+        color = "green" if result["health"] >= 90 else "yellow" if result["health"] >= 70 else "red"
+        console.print(Panel(f"[bold {color}]QA Audit: health {result['health']}/100 ({result['verdict']})[/bold {color}]  [dim]{result['elapsed']:.1f}s[/dim]", border_style=color))
+        if target:
+            console.print(f"[dim]URL:[/dim] {target} [dim]({how})[/dim]")
+        else:
+            console.print(f"[dim]URL:[/dim] none ({how})")
+        console.print(f"[dim]Pages:[/dim] {', '.join(result['pages_tested']) or '—'}  [dim]Links:[/dim] {result['links_ok']} ok / {result['links_fail']} fail  [dim]Console errors:[/dim] {result['console_errors']}")
+        console.print()
+        if not result["findings"]:
+            console.print("[green]No findings — ship-ready[/green]")
+        else:
+            for f in result["findings"]:
+                sev = f["severity"]
+                sev_color = {"CRITICAL": "red", "HIGH": "yellow", "MEDIUM": "cyan", "LOW": "dim"}.get(sev, "white")
+                console.print(f"[{sev_color}]{sev}:[/{sev_color}] {f['msg']} [dim]({f['where']})[/dim]")
+        console.print()
+
+    if output:
+        try:
+            import json as _j
+            Path(output).write_text(f"# QA Audit {result['health']}/100 ({result['verdict']})\n\nURL: {target or 'none'}\n\n```json\n{_j.dumps(result, indent=2)}\n```\n", encoding="utf-8")
+            console.print(f"[dim]Report written to {output}[/dim]")
+        except Exception as e:
+            console.print(f"[red]Failed to write {output}: {e}[/red]")
+
+    _timer.stop(status="failed" if result["health"] < 50 else "success")
+    show_audit_panel(_timer, extra={"URL": target or "none", "Health": f"{result['health']}/100 {result['verdict']}"})
+    if result["health"] < 50:
+        raise typer.Exit(1)
+
+
 # ---- `pandawa usage` command ---------------------------------------------------------------
 
 # Sonnet 4.x pricing (USD per 1M tokens) — used for cost estimates.
@@ -4795,9 +5005,29 @@ def run_tasks(goal: str = typer.Argument("", help="Optional goal or context to p
     _run_skill_command("tasks", goal)
 
 @run_app.command("implement")
-def run_implement(goal: str = typer.Argument("", help="Optional goal or context to pass to /pandawa.implement")):
-    """Run /pandawa.implement and report token usage."""
+def run_implement(
+    goal: str = typer.Argument("", help="Optional goal or context to pass to /pandawa.implement"),
+    qa: bool = typer.Option(True, "--qa/--no-qa", help="Auto-run QA audit after implement (uses same --url as `pandawa qa`)"),
+    qa_url: str = typer.Option(None, "--qa-url", help="URL for auto-QA (default auto-detect localhost)"),
+    qa_browser: str = typer.Option(None, "--qa-browser", help="Playwright browser for auto-QA"),
+):
+    """Run /pandawa.implement and report token usage. With --qa (default) also runs QA audit after."""
     _run_skill_command("implement", goal)
+    if qa:
+        console.print()
+        console.print("[cyan]Auto QA after implement…[/cyan] [dim](--no-qa to skip)[/dim]")
+        try:
+            target, _ = _qa_detect_url(qa_url)
+            res = _qa_run(target, qa_browser, quick=False)
+            col = "green" if res["health"] >= 70 else "yellow" if res["health"] >= 50 else "red"
+            console.print(Panel(f"[bold {col}]Auto QA: health {res['health']}/100 ({res['verdict']})[/bold {col}]", border_style=col))
+            for f in res["findings"][:8]:
+                sev_c = {"CRITICAL": "red", "HIGH": "yellow", "MEDIUM": "cyan", "LOW": "dim"}.get(f["severity"], "white")
+                console.print(f"[{sev_c}]{f['severity']}:[/{sev_c}] {f['msg']} [dim]({f['where']})[/dim]")
+            if len(res["findings"]) > 8:
+                console.print(f"[dim]… +{len(res['findings'])-8} more[/dim]")
+        except Exception as e:
+            console.print(f"[yellow]Auto QA skipped: {e}[/yellow]")
 
 @run_app.command("clarify")
 def run_clarify(goal: str = typer.Argument("", help="Optional goal or context to pass to /pandawa.clarify")):
