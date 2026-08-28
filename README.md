@@ -202,6 +202,8 @@ The `pandawa` command supports the following options:
 | `governance` | Manage governance plugins (list, install, uninstall, activate, disable)                                                                                 |
 | `skill`      | Manage skill plugins (list, install, uninstall, enable, disable)                                                                                        |
 | `run`        | Run `/pandawa.*` skills via Claude Code from the terminal                                                                                                 |
+| `pentest`    | Free-stack pentest — `gitleaks` + `pip-audit` + `nuclei/headers`, counts + SARIF (`--url`, `--severity`, `--quick`, `--json`, `--sarif`, `--output`) |
+| `qa`         | HTTP + Playwright quality audit, health 0-100 (`--url`, `--browser`, `--quick`)                                                                       |
 
 Each command prints a small **Process Audit** panel when finished (duration, and for AI-based commands, token usage/cost estimate) and appends a JSON-lines record to `.pandawa/audit.log` in the project (or `~/.config/pandawa/audit.log` when run outside a project). This is purely an informative local log for your own records — nothing is sent anywhere. `pandawa usage` reads the same session data to summarize costs across sessions or commands.
 
@@ -590,6 +592,7 @@ Additional commands for better quality and validation:
 | `/pandawa.analyze`   | Cross-artifact consistency & coverage analysis (run after `/pandawa.tasks`, before `/pandawa.implement`)                                 |
 | `/pandawa.checklist` | Generate custom quality checklist that validates completeness, clarity, and consistency of requirements (e.g., "unit test for Bahasa Indonesia") |
 | `/pandawa.test`      | Generate missing unit tests, run SonarQube-style code quality checks (code smell, duplication, complexity, security), and detect functional bugs — proving each bug with a failing test and reporting a Bug Report when found |
+| `/pandawa.pentest`   | Free-stack pentest — `gitleaks` + `pip-audit` + `nuclei/headers`, counts `critical/high/medium/low` + `verdict`, markdown `docs/security-reports/<date>-pentest.md` + SARIF 2.1.0 (`--url`, `--severity`, `--quick`, `--json`, `--sarif`) |
 | `/pandawa.redesign`  | Incrementally rework a part of an already-implemented feature (form, page, endpoint, or table) — scoped edit with checkpoint & rollback, instead of regenerating from scratch |
 | `/pandawa.taskstoissues` | Create GitHub issues from `tasks.md` via GitHub MCP server. Only runs if `git remote` is a GitHub URL — skips for GitLab-hosted projects |
 

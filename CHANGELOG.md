@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.3] - 2026-08-28
+
+### Added
+
+- **`/pandawa.pentest` slash**: New `templates/commands/pentest.md` — agent-friendly wrapper for `pandawa pentest` (`gitleaks` + `pip-audit` + `nuclei/headers`, counts + SARIF + markdown `docs/security-reports/<date>-pentest.md` / `.pandawa/reports/`). Args `[$ARGUMENTS]` → `--url/--severity/--quick/--json/--sarif/--output`; auto-generates `pandawa.pentest.md|toml` for all agents via `create-release-packages.sh:53` (`templates/commands/*.md` loop).
+
 ## [0.36.2] - 2026-08-27
 
 ### Fixed

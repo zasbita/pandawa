@@ -1,6 +1,6 @@
 [project]
 name = "pandawa-cli"
-version = "0.36.2"
+version = "0.36.3"
 description = "Pandawa CLI. A tool to bootstrap your projects for Spec-Driven Development (SDD)."
 requires-python = ">=3.11"
 dependencies = [
